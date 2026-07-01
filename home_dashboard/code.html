@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Reading App - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Literata:opsz,wght@7..72,400;7..72,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e5e2e1",
+                    "surface": "#fcf9f8",
+                    "on-primary-fixed-variant": "#3a4666",
+                    "on-tertiary-container": "#8cad98",
+                    "tertiary-fixed-dim": "#adceb8",
+                    "on-primary-fixed": "#0d1a38",
+                    "on-secondary-fixed": "#1b1c19",
+                    "on-secondary-container": "#63635f",
+                    "surface-tint": "#525e7f",
+                    "surface-container": "#f0eded",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#474744",
+                    "surface-container-high": "#eae7e7",
+                    "secondary": "#5f5e5b",
+                    "inverse-on-surface": "#f3f0ef",
+                    "on-primary-container": "#98a4c9",
+                    "on-surface-variant": "#45464e",
+                    "surface-variant": "#e5e2e1",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#244131",
+                    "background": "#fcf9f8",
+                    "outline-variant": "#c6c6ce",
+                    "secondary-container": "#e1dfdb",
+                    "primary": "#182442",
+                    "surface-container-low": "#f6f3f2",
+                    "inverse-surface": "#313030",
+                    "surface-bright": "#fcf9f8",
+                    "on-error": "#ffffff",
+                    "on-background": "#1c1b1b",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#c8c6c2",
+                    "on-tertiary-fixed-variant": "#2f4d3c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-dim": "#dcd9d9",
+                    "tertiary-fixed": "#c9ebd4",
+                    "on-surface": "#1c1b1b",
+                    "tertiary": "#0d2b1c",
+                    "error-container": "#ffdad6",
+                    "inverse-primary": "#bac6ec",
+                    "secondary-fixed": "#e4e2dd",
+                    "outline": "#75777e",
+                    "primary-fixed-dim": "#bac6ec",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#2e3a59",
+                    "on-tertiary-fixed": "#022113",
+                    "primary-fixed": "#dae2ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "unit": "4px",
+                    "sm": "8px",
+                    "xl": "40px",
+                    "xxl": "64px",
+                    "reading-width": "680px",
+                    "container-max": "1120px"
+            },
+            "fontFamily": {
+                    "body-reading": [
+                            "Literata"
+                    ],
+                    "label-caps": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "caption": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg-mobile": [
+                            "Literata"
+                    ],
+                    "headline-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Literata"
+                    ],
+                    "body-ui": [
+                            "Plus Jakarta Sans"
+                    ]
+            },
+            "fontSize": {
+                    "body-reading": [
+                            "18px",
+                            {
+                                    "lineHeight": "30px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "caption": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "display-lg-mobile": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "40px",
+                            {
+                                    "lineHeight": "52px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-ui": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-ui min-h-screen flex flex-col items-center">
+<!-- Top Navigation Container (Desktop) / Header Area -->
+<header class="w-full max-w-container-max px-md md:px-xxl py-lg flex justify-between items-center sticky top-0 bg-surface/90 backdrop-blur-md z-40">
+<div class="flex items-center gap-sm">
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">Good morning, Reader</h1>
+</div>
+<!-- Desktop Nav (Hidden on Mobile) -->
+<nav class="hidden md:flex gap-lg items-center">
+<a class="font-body-ui text-body-ui text-primary border-b-2 border-primary pb-1" href="#">Home</a>
+<a class="font-body-ui text-body-ui text-on-surface-variant hover:text-primary transition-colors pb-1" href="#">Library</a>
+<a class="font-body-ui text-body-ui text-on-surface-variant hover:text-primary transition-colors pb-1" href="#">Vocab</a>
+<a class="font-body-ui text-body-ui text-on-surface-variant hover:text-primary transition-colors pb-1" href="#">Stats</a>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+</button>
+</nav>
+<!-- Mobile Actions -->
+<div class="md:hidden flex items-center gap-sm">
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-container-max flex-1 flex flex-col px-md md:px-xxl pb-xxl mb-xxl">
+<div class="max-w-reading-width mx-auto w-full flex flex-col gap-xl mt-lg">
+<!-- Today's Goal -->
+<section class="w-full">
+<div class="bg-surface-container rounded-xl p-lg flex flex-col sm:flex-row items-center gap-lg border border-outline-variant/10 shadow-sm relative overflow-hidden">
+<div class="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+<!-- Progress Ring -->
+<div class="relative w-24 h-24 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Background circle -->
+<circle class="text-surface-container-highest" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-width="8"></circle>
+<!-- Progress circle -->
+<circle class="text-tertiary-container stroke-current" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="141.35" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-headline-md text-headline-md text-primary">50%</span>
+</div>
+</div>
+<div class="flex-1 text-center sm:text-left z-10">
+<h2 class="font-label-caps text-label-caps text-primary uppercase mb-xs">Today's Goal</h2>
+<p class="font-body-reading text-body-reading text-on-surface mb-sm">Read 20 Pages</p>
+<p class="font-caption text-caption text-on-surface-variant">You've read 10 pages so far. Keep it up!</p>
+</div>
+</div>
+</section>
+<!-- Continue Reading (Horizontal Scroll) -->
+<section class="w-full -mx-md md:mx-0 px-md md:px-0">
+<div class="flex justify-between items-end mb-md px-2 md:px-0">
+<h2 class="font-headline-md text-headline-md text-on-surface">Continue Reading</h2>
+<a class="font-caption text-caption text-primary hover:underline" href="#">View All</a>
+</div>
+<div class="flex overflow-x-auto gap-md pb-sm no-scrollbar px-2 md:px-0 snap-x">
+<!-- Book Card 1 -->
+<div class="snap-start shrink-0 w-64 flex flex-col gap-sm group cursor-pointer">
+<div class="w-full h-80 rounded-lg overflow-hidden shadow-sm border border-outline-variant/10 relative transition-transform duration-300 group-hover:-translate-y-1">
+<img class="w-full h-full object-cover" data-alt="A minimalist, modern book cover for 'Atomic Habits'. The cover features a clean, cream background with subtle geometric patterns in deep indigo. The typography is elegant and scholarly. The overall aesthetic is calm, focused, and intellectual, fitting a high-end digital reading app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWoS9OU-3XrqFDfsDK8AIi_8PWCjMynFOJfGZPNlYVTt0kuqZvjiWHKNcgBvzUVox7BYMOEGokl1HZnuNdapXazywcKcEd9lsxgqNeMB2r_zgkfbtrQIncKf8j9uQR579GWhpzg5YYB3NqREsUAngIsP9nk4qFoFwetDDuvF5IaEFGlYCIq1D3m-9Cf5GbvKErquDPiR0KaxmpFMXd7xAtqCgoxmaNcBAm7BW7Ju9zkl-sy4BFKHPz5Z-2MeAl1ZVUQgWsjrt-beU"/>
+<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-md pt-lg">
+<h3 class="font-body-ui text-body-ui text-white font-bold truncate">Atomic Habits</h3>
+<p class="font-caption text-caption text-white/80 truncate">James Clear</p>
+</div>
+</div>
+<div class="w-full px-1">
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-xs">
+<span>64%</span>
+<span>12 hrs left</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 64%"></div>
+</div>
+</div>
+</div>
+<!-- Book Card 2 -->
+<div class="snap-start shrink-0 w-64 flex flex-col gap-sm group cursor-pointer">
+<div class="w-full h-80 rounded-lg overflow-hidden shadow-sm border border-outline-variant/10 relative transition-transform duration-300 group-hover:-translate-y-1">
+<img class="w-full h-full object-cover" data-alt="A sophisticated, minimalist book cover design for 'Deep Work'. The cover uses a muted parchment texture background with deep charcoal architectural lines. The title is presented in a classic serif font, conveying academic rigor and deep focus. The lighting implies a quiet study environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPxX07I9zkeH86CwAq5A7XUYE5D41el7GUhRl6CgU3NsTSA4I5nSSG_SDY5q7fPCXW4AhwK00YtMmN3ioQayZiiGXV3LLHwcB024Sqg6iIYZeK6u5u682Cujew1Or4PCdDh8gIZm2eaa5VcuNmq6Qc1uS7KeBflwhhmO997Ro0o8cKn_PABAkPKbm9sBDxQ1wCvTPhDWRHPYrSLtiynp29kfw38NE8zALT1Oa2CMV-W2i-F4kGmXdKpSZuyMUeW5l-m53Z1KBahBo"/>
+<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-md pt-lg">
+<h3 class="font-body-ui text-body-ui text-white font-bold truncate">Deep Work</h3>
+<p class="font-caption text-caption text-white/80 truncate">Cal Newport</p>
+</div>
+</div>
+<div class="w-full px-1">
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-xs">
+<span>18%</span>
+<span>24 hrs left</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 18%"></div>
+</div>
+</div>
+</div>
+<!-- Book Card 3 -->
+<div class="snap-start shrink-0 w-64 flex flex-col gap-sm group cursor-pointer">
+<div class="w-full h-80 rounded-lg overflow-hidden shadow-sm border border-outline-variant/10 relative transition-transform duration-300 group-hover:-translate-y-1">
+<img class="w-full h-full object-cover" data-alt="A modern, elegant book cover for 'The Psychology of Money'. The design features abstract, flowing lines in soft gold and sage green against a dark, scholarly indigo background. The text is crisp and authoritative, emphasizing intellectual wealth over literal currency. Light mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrqERKwTbIQCNBXjfeBQVGZPX-vlWfavQZcWZO8qJ-_RsgviwNgyKvHAXClKkqZ0HJlQzGIu94jzuPN9nm3tAXMOPb8bmO5u6w3kJhsrlO4bF5NQvve4bNuAHcubHK2VecY_6lxZSfypTSLfuKUESRx0m8NtVLL5Cq33D_abcSamxBB4qSoPJzzD3kb-ngsMPAtXm6o4JTwZxnZ3fx-q6KK4X45nd6IEktHJ97gJqdvXW7JIqHA_KOObiHhJ6zyYxb4kDoN0JtbAc"/>
+<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-md pt-lg">
+<h3 class="font-body-ui text-body-ui text-white font-bold truncate">Psychology of Money</h3>
+<p class="font-caption text-caption text-white/80 truncate">Morgan Housel</p>
+</div>
+</div>
+<div class="w-full px-1">
+<div class="flex justify-between font-caption text-caption text-on-surface-variant mb-xs">
+<span>82%</span>
+<span>3 hrs left</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 82%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Quick Links -->
+<section class="w-full">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-md">Recent Activity</h2>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-md">
+<!-- Vocab -->
+<a class="flex items-center gap-md p-md rounded-xl border border-outline-variant/10 bg-surface hover:bg-surface-container-low transition-colors shadow-sm" href="#">
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+</div>
+<div>
+<h3 class="font-body-ui text-body-ui font-semibold text-on-surface">Vocabulary</h3>
+<p class="font-caption text-caption text-on-surface-variant">12 words added</p>
+</div>
+</a>
+<!-- Highlights -->
+<a class="flex items-center gap-md p-md rounded-xl border border-outline-variant/10 bg-surface hover:bg-surface-container-low transition-colors shadow-sm" href="#">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container/20 flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">border_color</span>
+</div>
+<div>
+<h3 class="font-body-ui text-body-ui font-semibold text-on-surface">Highlights</h3>
+<p class="font-caption text-caption text-on-surface-variant">From Atomic Habits</p>
+</div>
+</a>
+<!-- Notes -->
+<a class="flex items-center gap-md p-md rounded-xl border border-outline-variant/10 bg-surface hover:bg-surface-container-low transition-colors shadow-sm" href="#">
+<div class="w-12 h-12 rounded-lg bg-secondary-container/50 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">edit_note</span>
+</div>
+<div>
+<h3 class="font-body-ui text-body-ui font-semibold text-on-surface">Notes</h3>
+<p class="font-caption text-caption text-on-surface-variant">Deep Work reflection</p>
+</div>
+</a>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface/90 backdrop-blur-md border-t border-on-surface/10">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<!-- Library -->
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-highest transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">import_contacts</span>
+<span class="font-label-caps text-label-caps mt-1">Library</span>
+</a>
+<!-- Vocab -->
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-highest transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+<span class="font-label-caps text-label-caps mt-1">Vocab</span>
+</a>
+<!-- Stats -->
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-highest transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+<span class="font-label-caps text-label-caps mt-1">Stats</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-highest transition-colors rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+</body></html>
