@@ -14,9 +14,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Search, Plus, Edit3, Trash2, BookOpen } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Plus, Edit3, Trash2, Highlighter, StickyNote } from "lucide-react";
 import useStore from "@/lib/store";
-import { useShallow } from "zustand/react/shallow";
 
 const highlightColors = [
   { label: "Yellow", value: "#fde047" },
@@ -27,53 +27,82 @@ const highlightColors = [
 ];
 
 export default function NotesPage() {
-  const { notes, addNote, updateNote, deleteNote } = useStore(
-    useShallow((s) => ({ notes: s.notes, addNote: s.addNote, updateNote: s.updateNote, deleteNote: s.deleteNote }))
-  );
+  const highlights = useStore((s) => s.highlights);
+  const notes = useStore((s) => s.notes);
+  const books = useStore((s) => s.books);
+  const addHighlight = useStore((s) => s.addHighlight);
+  const removeHighlight = useStore((s) => s.removeHighlight);
+  const updateHighlight = useStore((s) => s.updateHighlight);
+  const addNote = useStore((s) => s.addNote);
+  const updateNote = useStore((s) => s.updateNote);
+  const deleteNote = useStore((s) => s.deleteNote);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [noteText, setNoteText] = useState("");
   const [noteHighlight, setNoteHighlight] = useState("#fde047");
+  const [activeTab, setActiveTab] = useState("highlights");
 
-  const filtered = notes.filter(
-    (n) =>
-      !searchQuery ||
-      n.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.bookTitle.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredHighlights = useMemo(() => {
+    return highlights.filter(
+      (h) =>
+        !searchQuery ||
+        h.text.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [highlights, searchQuery]);
 
-  const openNew = () => {
-    setEditingNote(null);
+  const filteredNotes = useMemo(() => {
+    return notes.filter(
+      (n) =>
+        !searchQuery ||
+        n.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (n.bookTitle && n.bookTitle.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [notes, searchQuery]);
+
+  const getBookTitle = (bookId) => {
+    return books.find((b) => b.id === bookId)?.title || "Unknown Book";
+  };
+
+  const openNewNote = () => {
+    setEditingItem(null);
     setNoteText("");
     setNoteHighlight("#fde047");
     setDialogOpen(true);
   };
 
-  const openEdit = (note) => {
-    setEditingNote(note);
+  const openEditNote = (note) => {
+    setEditingItem(note);
     setNoteText(note.text);
-    setNoteHighlight(note.color);
+    setNoteHighlight(note.color || "#fde047");
+    setDialogOpen(true);
+  };
+
+  const openEditHighlight = (highlight) => {
+    setEditingItem({ ...highlight, isHighlight: true });
+    setNoteText(highlight.text);
+    setNoteHighlight(highlight.color || "#fde047");
     setDialogOpen(true);
   };
 
   const handleSave = () => {
     if (!noteText.trim()) return;
 
-    if (editingNote) {
-      updateNote(editingNote.id, {
+    if (editingItem?.isHighlight) {
+      updateHighlight(editingItem.id, {
         text: noteText,
         color: noteHighlight,
-        updatedAt: new Date().toISOString(),
       });
+    } else if (editingItem) {
+      updateNote(editingItem.id, { text: noteText, color: noteHighlight });
     } else {
       addNote({
         id: Date.now().toString(),
-        bookId: "1",
-        bookTitle: "Atomic Habits",
+        bookId: "",
+        bookTitle: "",
         text: noteText,
-        highlight: "highlight-yellow",
-        page: 1,
+        page: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         color: noteHighlight,
@@ -89,10 +118,11 @@ export default function NotesPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">Notes</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {notes.length} notes from your readings
+              {highlights.length + notes.length} item
+              {highlights.length + notes.length !== 1 ? "s" : ""} saved
             </p>
           </div>
-          <Button onClick={openNew}>
+          <Button onClick={openNewNote}>
             <Plus className="h-4 w-4 mr-2" /> Add Note
           </Button>
         </div>
@@ -100,69 +130,146 @@ export default function NotesPage() {
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search notes..."
+            placeholder="Search notes and highlights..."
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <BookOpen className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-sm text-muted-foreground">No notes yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Highlight text in the reader to add notes
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((note) => (
-              <Card key={note.id} className="relative overflow-hidden">
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-1"
-                  style={{ backgroundColor: note.color }}
-                />
-                <CardHeader className="pb-2 pl-5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-sm font-medium">{note.bookTitle}</CardTitle>
-                      <p className="text-xs text-muted-foreground">
-                        Page {note.page} · {new Date(note.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => openEdit(note)}
-                      >
-                        <Edit3 className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => deleteNote(note.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pl-5">
-                  <p className="text-sm font-literata">{note.text}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="highlights" className="gap-1.5">
+              <Highlighter className="h-3.5 w-3.5" />
+              Highlights ({highlights.length})
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="gap-1.5">
+              <StickyNote className="h-3.5 w-3.5" />
+              Notes ({notes.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="highlights" className="mt-4">
+            {filteredHighlights.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Highlighter className="h-10 w-10 text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  {highlights.length === 0
+                    ? "No highlights yet"
+                    : "No highlights match your search"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Select text in the reader and click the highlight icon
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {filteredHighlights.map((h) => (
+                  <Card key={h.id} className="relative overflow-hidden">
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1"
+                      style={{ backgroundColor: h.color }}
+                    />
+                    <CardContent className="pl-5 py-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-literata italic text-muted-foreground">
+                            &ldquo;{h.text}&rdquo;
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {getBookTitle(h.bookId)}
+                            {h.page ? ` · Page ${h.page}` : ""}
+                          </p>
+                        </div>
+                        <div className="flex gap-0.5 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => openEditHighlight(h)}
+                          >
+                            <Edit3 className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => removeHighlight(h.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="notes" className="mt-4">
+            {filteredNotes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <StickyNote className="h-10 w-10 text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  {notes.length === 0 ? "No notes yet" : "No notes match your search"}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredNotes.map((note) => (
+                  <Card key={note.id} className="relative overflow-hidden">
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1"
+                      style={{ backgroundColor: note.color }}
+                    />
+                    <CardHeader className="pb-2 pl-5">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-sm font-medium">
+                            {note.bookTitle || "Note"}
+                          </CardTitle>
+                          <p className="text-xs text-muted-foreground">
+                            {note.page ? `Page ${note.page} · ` : ""}
+                            {new Date(note.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => openEditNote(note)}
+                          >
+                            <Edit3 className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => deleteNote(note.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pl-5">
+                      <p className="text-sm font-literata">{note.text}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingNote ? "Edit Note" : "New Note"}</DialogTitle>
+              <DialogTitle>
+                {editingItem ? "Edit" : "New"} {editingItem?.isHighlight ? "Highlight" : "Note"}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <Textarea
@@ -172,7 +279,7 @@ export default function NotesPage() {
                 rows={4}
               />
               <div>
-                <p className="text-sm font-medium mb-2">Highlight Color</p>
+                <p className="text-sm font-medium mb-2">Color</p>
                 <div className="flex gap-2">
                   {highlightColors.map((c) => (
                     <button
@@ -193,7 +300,9 @@ export default function NotesPage() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>{editingNote ? "Save" : "Add"}</Button>
+              <Button onClick={handleSave}>
+                {editingItem ? "Save" : "Add"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
