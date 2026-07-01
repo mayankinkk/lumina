@@ -5,6 +5,7 @@ import { Greeting } from "@/components/home/greeting";
 import { GoalWidget } from "@/components/home/goal-widget";
 import { ContinueReading } from "@/components/home/continue-reading";
 import { RecentActivity } from "@/components/home/recent-activity";
+import { ReadingStats } from "@/components/home/reading-stats";
 
 export default function HomePage() {
   return (
@@ -13,8 +14,9 @@ export default function HomePage() {
         <Greeting />
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           <GoalWidget />
-          <RecentActivity />
+          <ReadingStats />
         </div>
+        <RecentActivity />
         <ContinueReading />
       </div>
     </ShellLayout>
