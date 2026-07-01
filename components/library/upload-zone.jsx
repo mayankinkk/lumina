@@ -101,8 +101,7 @@ export function UploadZone() {
       for (const file of files) {
         try {
           await processFile(file);
-        } catch (err) {
-          console.error("Failed to process file:", file.name, err);
+        } catch {
         }
       }
       setUploading(false);

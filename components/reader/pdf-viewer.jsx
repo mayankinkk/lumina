@@ -97,8 +97,7 @@ export function PdfViewer({ bookId }) {
             lastOpened: new Date().toISOString(),
           });
         }
-      } catch (err) {
-        console.error("Render error:", err);
+      } catch {
       } finally {
         renderingRef.current = false;
       }
