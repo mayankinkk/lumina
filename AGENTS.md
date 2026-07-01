@@ -33,7 +33,6 @@ lumina/
 │   ├── reader/[id]/       # PDF Reader with dynamic route
 │   ├── vocabulary/        # Vocabulary Notebook
 │   ├── notes/             # Highlights & Notes
-│   ├── analytics/         # Reading Analytics
 │   ├── settings/          # App Settings
 │   └── api/ai/            # AI API route (server-side)
 ├── components/
@@ -44,11 +43,10 @@ lumina/
 │   ├── reader/            # Reader components (PDF viewer, toolbar)
 │   ├── vocabulary/        # Vocabulary components
 │   ├── notes/             # Notes components
-│   └── analytics/         # Analytics components
 ├── lib/
 │   ├── utils.js           # cn() helper
 │   ├── store.js           # Zustand global store
-│   └── mock-data.js       # Mock data for development
+│   ├── sm2.js             # SM-2 spaced repetition algorithm
 ├── hooks/                 # Custom React hooks
 └── public/                # Static assets, manifest, icons
 ```

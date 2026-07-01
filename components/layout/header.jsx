@@ -14,7 +14,6 @@ const navItems = [
   { href: "/library", label: "Library" },
   { href: "/vocabulary", label: "Vocabulary" },
   { href: "/notes", label: "Notes" },
-  { href: "/analytics", label: "Analytics" },
   { href: "/settings", label: "Settings" },
 ];
 

@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Home, BookOpen, BookMarked, BarChart3, User } from "lucide-react";
+import { Home, BookOpen, BookMarked, StickyNote, User } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/vocabulary", label: "Vocab", icon: BookMarked },
-  { href: "/analytics", label: "Stats", icon: BarChart3 },
+  { href: "/notes", label: "Notes", icon: StickyNote },
   { href: "/settings", label: "Profile", icon: User },
 ];
 

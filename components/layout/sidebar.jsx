@@ -8,7 +8,6 @@ import {
   BookOpen,
   BookMarked,
   StickyNote,
-  BarChart3,
   Settings,
   X,
 } from "lucide-react";
@@ -22,7 +21,6 @@ const navItems = [
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/vocabulary", label: "Vocabulary", icon: BookMarked },
   { href: "/notes", label: "Notes", icon: StickyNote },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
