@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import useStore from "@/lib/store";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/utils";
 
 async function loadPdfWorker() {
   const pdfjsLib = await import("pdfjs-dist");
@@ -17,6 +18,7 @@ export function UploadZone() {
   const { toast } = useToast();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const processFile = useCallback(
     async (file) => {
@@ -88,33 +90,13 @@ export function UploadZone() {
         addBook(book);
         return book;
       }
-
-      const book = {
-        id: crypto.randomUUID(),
-        title: file.name.replace(/\.[^/.]+$/, ""),
-        author: "Unknown Author",
-        format: ext,
-        status: "want_to_read",
-        totalPages: 0,
-        currentPage: 0,
-        progress: 0,
-        lastOpened: null,
-        dateAdded: new Date().toISOString(),
-        fileName: file.name,
-        fileSize: file.size,
-      };
-
-      addBook(book);
-      return book;
     },
-    [addBook]
+    [addBook, toast]
   );
 
-  const handleFileUpload = useCallback(
-    async (e) => {
-      const files = Array.from(e.target.files || []);
+  const handleFiles = useCallback(
+    async (files) => {
       if (files.length === 0) return;
-
       setUploading(true);
       for (const file of files) {
         try {
@@ -129,8 +111,40 @@ export function UploadZone() {
     [processFile]
   );
 
+  const handleFileUpload = useCallback(
+    (e) => handleFiles(Array.from(e.target.files || [])),
+    [handleFiles]
+  );
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+      handleFiles(Array.from(e.dataTransfer.files || []));
+    },
+    [handleFiles]
+  );
+
   return (
-    <Card className="border-dashed">
+    <Card
+      className={cn("border-dashed transition-colors", dragging && "border-primary bg-primary/5")}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <CardContent className="flex flex-col items-center justify-center py-8">
         <div
           className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 cursor-pointer transition-colors hover:bg-primary/20"
@@ -141,7 +155,7 @@ export function UploadZone() {
         <p className="mt-3 text-sm font-medium">
           {uploading ? "Processing files..." : "Drop files here or click to upload"}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">Supports PDF and TXT files</p>
+        <p className="mt-1 text-xs text-muted-foreground">Supports PDF and TXT files up to 100MB</p>
         <input
           ref={fileInputRef}
           type="file"
