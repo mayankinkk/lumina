@@ -20,8 +20,18 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata = {
   title: "Lumina - AI Reading Companion",
-  description: "An AI-powered reading application for deep focus and learning",
+  description: "An AI-powered reading application for deep focus and learning with PDF reader, vocabulary builder, and smart highlights.",
   manifest: "/manifest.json",
+  openGraph: {
+    title: "Lumina - AI Reading Companion",
+    description: "An AI-powered reading application for deep focus and learning",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lumina - AI Reading Companion",
+    description: "An AI-powered reading application for deep focus and learning",
+  },
 };
 
 export function generateViewport() {
