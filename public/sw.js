@@ -1,4 +1,4 @@
-const CACHE_NAME = "lumina-v2";
+const CACHE_NAME = "lumina-v3";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -16,6 +16,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (event.request.url.includes("/api/")) return;
+  if (event.request.url.includes("/_next/")) return;
 
   const isNavigation = event.request.mode === "navigate";
 
@@ -28,15 +29,14 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      const fetched = fetch(event.request).then((response) => {
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
         if (response && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => cached);
-
-      return cached || fetched;
+      });
     })
   );
 });
