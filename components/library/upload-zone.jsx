@@ -1,17 +1,9 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Upload, Cloud, Globe } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import useStore from "@/lib/store";
-
-const importSources = [
-  { label: "Device", icon: Upload },
-  { label: "Google Drive", icon: Cloud },
-  { label: "Dropbox", icon: Cloud },
-  { label: "OneDrive", icon: Cloud },
-  { label: "URL (PDF)", icon: Globe },
-];
 
 async function loadPdfWorker() {
   const pdfjsLib = await import("pdfjs-dist");
@@ -44,7 +36,7 @@ export function UploadZone() {
         } catch {}
 
         const book = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           title,
           author,
           format: "pdf",
@@ -66,7 +58,7 @@ export function UploadZone() {
       if (ext === "txt") {
         const text = await file.text();
         const book = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           title: file.name.replace(/\.txt$/i, ""),
           author: "Unknown Author",
           format: "txt",
@@ -86,7 +78,7 @@ export function UploadZone() {
       }
 
       const book = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         title: file.name.replace(/\.[^/.]+$/, ""),
         author: "Unknown Author",
         format: ext,
@@ -142,27 +134,10 @@ export function UploadZone() {
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.txt,.epub,.mobi,.docx"
+          accept=".pdf,.txt"
           multiple
           onChange={handleFileUpload}
         />
-
-        <div className="mt-6 grid grid-cols-5 gap-3 w-full max-w-lg">
-          {importSources.map((source) => (
-            <button
-              key={source.label}
-              className="flex flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-colors hover:bg-accent"
-              onClick={() => {
-                if (source.label === "Device") fileInputRef.current?.click();
-              }}
-            >
-              <source.icon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground text-center leading-tight">
-                {source.label}
-              </span>
-            </button>
-          ))}
-        </div>
       </CardContent>
     </Card>
   );

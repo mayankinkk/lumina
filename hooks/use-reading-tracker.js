@@ -31,7 +31,7 @@ export function useReadingTracker(bookId) {
 
       if (minutes >= 1 || pagesRead > 0) {
         addReadingSession({
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           bookId,
           date: new Date().toISOString().slice(0, 10),
           minutes,

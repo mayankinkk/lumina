@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,7 @@ export function PdfToolbar({ bookId }) {
       totalPages: s.totalPages,
     }))
   );
+  const updateBook = useStore((s) => s.updateBook);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const allBooks = useStore((s) => s.books);
@@ -46,6 +47,17 @@ export function PdfToolbar({ bookId }) {
         </div>
 
         <div className="flex items-center gap-1">
+          {book?.status !== "finished" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-xs text-green-600 hover:text-green-700"
+              onClick={() => updateBook(bookId, { status: "finished" })}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Finish</span>
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
