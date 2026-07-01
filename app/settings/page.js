@@ -25,12 +25,17 @@ export default function SettingsPage() {
   const notes = useStore((s) => s.notes);
   const highlights = useStore((s) => s.highlights);
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
+    const bookIds = books.map((b) => b.id);
     localStorage.removeItem("lumina_books");
     localStorage.removeItem("lumina_vocabulary");
     localStorage.removeItem("lumina_notes");
     localStorage.removeItem("lumina_highlights");
     localStorage.removeItem("lumina_sessions");
+    localStorage.removeItem("lumina_daily_goal");
+    for (const id of bookIds) {
+      try { await import("idb-keyval").then((m) => m.del(`lumina_file_${id}`)); } catch {}
+    }
     window.location.reload();
   };
 
