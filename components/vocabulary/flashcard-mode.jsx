@@ -45,8 +45,13 @@ export function FlashcardMode({ words, onReview, onExit }) {
     return () => window.removeEventListener("keydown", handler);
   }, [flipped, index, words.length, handleReview, onExit]);
 
+  useEffect(() => {
+    if (words.length === 0) {
+      onExit();
+    }
+  }, [words.length, onExit]);
+
   if (words.length === 0) {
-    onExit();
     return null;
   }
 
