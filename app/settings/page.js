@@ -263,7 +263,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Version</p>
-                  <p className="text-sm">1.0.0</p>
+                  <p className="text-sm">0.1.0</p>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
