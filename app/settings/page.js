@@ -61,10 +61,10 @@ export default function SettingsPage() {
 
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList className="w-full justify-start h-auto p-1">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="appearance">Appearance</TabsTrigger>
-            <TabsTrigger value="data">Data</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="general" aria-label="General settings">General</TabsTrigger>
+            <TabsTrigger value="appearance" aria-label="Appearance settings">Appearance</TabsTrigger>
+            <TabsTrigger value="data" aria-label="Data management">Data</TabsTrigger>
+            <TabsTrigger value="about" aria-label="About Lumina">About</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">

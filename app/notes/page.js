@@ -74,8 +74,8 @@ export default function NotesPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="highlights" className="gap-1.5"><Highlighter className="h-3.5 w-3.5" /> Highlights ({highlights.length})</TabsTrigger>
-            <TabsTrigger value="notes" className="gap-1.5"><StickyNote className="h-3.5 w-3.5" /> Notes ({notes.length})</TabsTrigger>
+            <TabsTrigger value="highlights" className="gap-1.5" aria-label={`${highlights.length} highlights`}><Highlighter className="h-3.5 w-3.5" /> Highlights ({highlights.length})</TabsTrigger>
+            <TabsTrigger value="notes" className="gap-1.5" aria-label={`${notes.length} notes`}><StickyNote className="h-3.5 w-3.5" /> Notes ({notes.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="highlights" className="mt-4">
