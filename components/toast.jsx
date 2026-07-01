@@ -49,7 +49,7 @@ export function ToastProvider({ children }) {
 }
 
 export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) return () => {};
-  return ctx;
+  const toast = useContext(ToastContext);
+  if (!toast) return () => {};
+  return { toast };
 }

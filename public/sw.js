@@ -1,19 +1,6 @@
-const CACHE_NAME = "lumina-v1";
-const STATIC_ASSETS = [
-  "/",
-  "/library",
-  "/vocabulary",
-  "/notes",
-  "/settings",
-  "/manifest.json",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg",
-];
+const CACHE_NAME = "lumina-v2";
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
@@ -29,6 +16,15 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (event.request.url.includes("/api/")) return;
+
+  const isNavigation = event.request.mode === "navigate";
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match("/"))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
