@@ -2,7 +2,16 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, Bookmark, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  ZoomIn,
+  ZoomOut,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,44 +22,71 @@ import { useShallow } from "zustand/react/shallow";
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
   const { zoom, setZoom, currentPage, totalPages } = useStore(
-    useShallow((s) => ({ zoom: s.zoom, setZoom: s.setZoom, currentPage: s.currentPage, totalPages: s.totalPages }))
+    useShallow((s) => ({
+      zoom: s.zoom,
+      setZoom: s.setZoom,
+      currentPage: s.currentPage,
+      totalPages: s.totalPages,
+    }))
   );
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const allBooks = useStore((s) => s.books);
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
-
-  const goBack = () => router.push("/library");
 
   return (
     <div className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between px-3 py-2 lg:px-4">
         <div className="flex items-center gap-2 min-w-0">
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={goBack}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => router.push("/library")}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0">
             <p className="text-sm font-medium truncate">{book?.title || "Document"}</p>
             <p className="text-xs text-muted-foreground">
-              {currentPage} of {totalPages || "—"} pages
+              Page {currentPage} of {totalPages || "—"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(!searchOpen)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setSearchOpen(!searchOpen)}
+          >
             <Search className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(zoom - 10)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setZoom(zoom - 10)}
+          >
             <ZoomOut className="h-4 w-4" />
           </Button>
           <Badge variant="secondary" className="text-xs min-w-[48px] justify-center">
             {zoom}%
           </Badge>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(zoom + 10)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setZoom(zoom + 10)}
+          >
             <ZoomIn className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(100)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setZoom(100)}
+          >
             <RotateCcw className="h-4 w-4" />
           </Button>
         </div>
@@ -58,17 +94,11 @@ export function PdfToolbar({ bookId }) {
 
       {searchOpen && (
         <div className="border-t px-3 py-2">
-          <Input
-            placeholder="Search in document..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-sm"
-            autoFocus
-          />
+          <Input placeholder="Search in document..." className="max-w-sm" autoFocus />
         </div>
       )}
 
-      {book && (
+      {book && book.totalPages > 0 && (
         <div className="px-3 pb-2 lg:px-4">
           <Progress value={book.progress} className="h-0.5" />
         </div>
@@ -78,21 +108,135 @@ export function PdfToolbar({ bookId }) {
 }
 
 export function PdfViewer({ bookId }) {
-  const { zoom, currentPage, setCurrentPage, setTotalPages } = useStore(
-    useShallow((s) => ({ zoom: s.zoom, currentPage: s.currentPage, setCurrentPage: s.setCurrentPage, setTotalPages: s.setTotalPages }))
+  const {
+    zoom,
+    currentPage,
+    setCurrentPage,
+    setTotalPages,
+  } = useStore(
+    useShallow((s) => ({
+      zoom: s.zoom,
+      currentPage: s.currentPage,
+      setCurrentPage: s.setCurrentPage,
+      setTotalPages: s.setTotalPages,
+    }))
   );
   const allBooks = useStore((s) => s.books);
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
+  const loadFileData = useStore((s) => s.loadFileData);
+  const updateBook = useStore((s) => s.updateBook);
+
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const pdfDocRef = useRef(null);
+  const renderingRef = useRef(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedText, setSelectedText] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
-  const containerRef = useRef(null);
 
+  // Load PDF document
   useEffect(() => {
-    if (book) {
-      setTotalPages(book.totalPages);
-      setCurrentPage(book.currentPage || 1);
+    if (!book) return;
+    let cancelled = false;
+
+    async function loadPdf() {
+      setLoading(true);
+      setError(null);
+
+      const fileData = loadFileData(bookId);
+
+      if (book.format === "txt") {
+        if (!cancelled) {
+          setTotalPages(1);
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (!fileData) {
+        if (!cancelled) {
+          setError("File data not available. Please re-upload the file.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        const pdf = await pdfjsLib.getDocument({ data: fileData }).promise;
+        if (cancelled) return;
+        pdfDocRef.current = pdf;
+        setTotalPages(pdf.numPages);
+        setLoading(false);
+
+        if (book.currentPage > 0) {
+          setCurrentPage(book.currentPage);
+        } else {
+          setCurrentPage(1);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to load PDF:", err);
+          setError("Failed to load PDF file.");
+          setLoading(false);
+        }
+      }
     }
-  }, [book, setTotalPages, setCurrentPage]);
+
+    loadPdf();
+    return () => { cancelled = true; };
+  }, [bookId, book, loadFileData, setTotalPages, setCurrentPage]);
+
+  // Render current page
+  useEffect(() => {
+    if (!pdfDocRef.current || loading || currentPage < 1) return;
+    let cancelled = false;
+
+    async function renderPage() {
+      if (renderingRef.current) return;
+      renderingRef.current = true;
+
+      try {
+        const pdf = pdfDocRef.current;
+        if (!pdf || cancelled) return;
+        const page = await pdf.getPage(currentPage);
+        if (cancelled) return;
+
+        const scale = (zoom / 100) * 1.5;
+        const viewport = page.getViewport({ scale });
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        // Track progress
+        if (!cancelled && book) {
+          const newPage = currentPage;
+          const newProgress = book.totalPages > 0
+            ? Math.round((newPage / book.totalPages) * 100)
+            : 0;
+          updateBook(bookId, {
+            currentPage: newPage,
+            progress: newProgress,
+            lastOpened: new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        console.error("Render error:", err);
+      } finally {
+        renderingRef.current = false;
+      }
+    }
+
+    renderPage();
+  }, [currentPage, zoom, loading, bookId, book, updateBook]);
 
   const handleTextSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -101,7 +245,6 @@ export function PdfViewer({ bookId }) {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
       const containerRect = containerRef.current?.getBoundingClientRect();
-
       setSelectedText(text);
       setContextMenu({
         x: rect.left - (containerRect?.left || 0) + rect.width / 2,
@@ -118,14 +261,6 @@ export function PdfViewer({ bookId }) {
     setSelectedText("");
   }, []);
 
-  const goToPrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
   if (!book) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -134,17 +269,11 @@ export function PdfViewer({ bookId }) {
     );
   }
 
-  const sampleText = `
-    <h2 class="font-literata text-2xl font-bold mb-6">Chapter 1: The Surprising Power of Atomic Habits</h2>
-    <p class="mb-4 font-literata text-lg leading-relaxed">The British Cycling team had operated in the shadows of professional cycling for nearly a century. The organization had purchased 10 racing bikes over the past decade, and every single one had been built by other teams. In fact, the performance was so underwhelming that one of the top bike manufacturers in the world refused to sell bikes to the team for fear that it would hurt sales.</p>
-    <p class="mb-4 font-literata text-lg leading-relaxed">Then Dave Brailsford was hired. Brailsford had been hired to follow a strategy known as the <strong>"aggregation of marginal gains,"</strong> which was the recursive process of getting 1 percent better with every aspect of the process. The theory was that if you improved every area related to cycling by just 1 percent, then you would get a significant increase when you added them all together.</p>
-    <p class="mb-4 font-literata text-lg leading-relaxed">Brailsford and his coaches began by making small adjustments you might expect from a professional cycling team. They redesigned the bike seats to make them more comfortable and rubbed alcohol on the tires for a better grip. They asked riders to wear electrically heated overshorts to maintain ideal muscle temperature while riding and used biofeedback sensors to monitor how each athlete responded to a particular workout.</p>
-    <p class="mb-4 font-literata text-lg leading-relaxed">The team tested various fabrics in a wind tunnel and had their outdoor riders switch to indoor racing suits, which proved to be lighter and more aerodynamic. But Brailsford and his team did not stop there. They tested different types of massage gels to see which one led to the fastest muscle recovery. They hired a surgeon to teach each rider the best way to wash their hands to reduce the chances of catching a cold. They convinced the riders to experiment with different types of pillows and mattresses to improve their sleep quality.</p>
-    <p class="mb-4 font-literata text-lg leading-relaxed">The team began tracking each rider's power output in detail and bought a fleet of caravans to ensure that the riders' nutrition was precisely calibrated. Brailsford even brought in a sports psychologist to help riders develop the mental toughness needed to win in those final, agonizing milliseconds of a race.</p>
-    <p class="mb-4 font-literata text-lg leading-relaxed">Five years after Brailsford arrived, the results spoke for themselves. At the 2008 Beijing Games, the British cycling team dominated the road and track cycling events, winning an astounding 60 percent of the gold medals available. Four years later, at the London Olympics, the British once again dominated the cycling events. The team captured 70 percent of the gold medals and set nine Olympic records.</p>
-    <p class="mb-4 font-literata text-lg leading-relaxed">It is so easy to overestimate the importance of one defining moment and underestimate the value of making small improvements on a daily basis. Meanwhile, improving by 1 percent isn't particularly notable—sometimes it isn't even noticeable—but it can be far more meaningful in the long run.</p>
-    <p class="font-literata text-lg leading-relaxed">Here's how the math works out: if you get 1 percent better each day for one year, you'll end up thirty-seven times better by the time you're done. Conversely, if you get 1 percent worse each day for one year, you'll decline nearly down to zero. What starts as a small win or a minor setback accumulates into something much more.</p>
-  `;
+  if (book.format === "txt") {
+    return (
+      <TxtViewer bookId={bookId} book={book} zoom={zoom} />
+    );
+  }
 
   return (
     <div
@@ -153,46 +282,90 @@ export function PdfViewer({ bookId }) {
       onMouseUp={handleTextSelection}
       onClick={dismissContextMenu}
     >
-      <div className="mx-auto py-8 px-4 lg:px-8" style={{ maxWidth: `${(zoom / 100) * 680}px` }}>
-        <div className="reading-well">
-          <div
-            className="font-literata text-foreground"
-            dangerouslySetInnerHTML={{ __html: sampleText }}
+      {loading && (
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {error && (
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-2">
+          <p className="text-sm text-destructive">{error}</p>
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="flex justify-center py-4 px-2">
+          <canvas
+            ref={canvasRef}
+            className="max-w-full shadow-lg"
+            style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
           />
         </div>
-      </div>
+      )}
 
       {contextMenu && (
         <div
           className="absolute z-50"
-          style={{ left: contextMenu.x, top: contextMenu.y, transform: "translateX(-50%) translateY(-100%)" }}
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+            transform: "translateX(-50%) translateY(-100%)",
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          <ContextMenuPopup text={selectedText} position={contextMenu} />
+          <ContextMenuPopup text={selectedText} bookId={bookId} />
         </div>
       )}
+    </div>
+  );
+}
 
-      <div className="fixed bottom-20 lg:bottom-8 left-1/2 -translate-x-1/2 z-30">
-        <div className="flex items-center gap-1 rounded-full border bg-background/95 backdrop-blur px-2 py-1 shadow-lg">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToPrevPage} disabled={currentPage <= 1}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="min-w-[60px] text-center text-xs font-medium">
-            {currentPage} / {totalPages}
-          </span>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToNextPage} disabled={currentPage >= totalPages}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+function TxtViewer({ bookId, book, zoom }) {
+  const fileCache = useStore((s) => s.fileCache);
+  const updateBook = useStore((s) => s.updateBook);
+  const textContent = fileCache[bookId];
+
+  useEffect(() => {
+    if (textContent && book) {
+      updateBook(bookId, {
+        progress: 100,
+        currentPage: 1,
+        status: book.status === "want_to_read" ? "reading" : book.status,
+        lastOpened: new Date().toISOString(),
+      });
+    }
+  }, [textContent, bookId, book, updateBook]);
+
+  if (!textContent) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <p className="text-muted-foreground">Text content not available. Please re-upload.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center py-8 px-4">
+      <div
+        className="reading-well font-literata text-foreground whitespace-pre-wrap leading-relaxed"
+        style={{ fontSize: `${(zoom / 100) * 18}px` }}
+      >
+        {textContent}
       </div>
     </div>
   );
 }
 
-function ContextMenuPopup({ text }) {
+function ContextMenuPopup({ text, bookId }) {
   const [showAiDrawer, setShowAiDrawer] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
   const addVocabularyWord = useStore((s) => s.addVocabularyWord);
+  const addHighlight = useStore((s) => s.addHighlight);
+  const addNote = useStore((s) => s.addNote);
 
   const actions = [
     { label: "Define", icon: "📖", id: "define" },
@@ -215,15 +388,37 @@ function ContextMenuPopup({ text }) {
         partOfSpeech: "Unknown",
         mastery: "B2",
         masteryLevel: 0,
-        meaning: "Definition pending...",
+        meaning: "",
         pronunciation: "",
         example: text,
         synonyms: [],
         antonyms: [],
         etymology: "",
         nextReview: new Date(Date.now() + 86400000).toISOString(),
-        tags: [],
         dateAdded: new Date().toISOString(),
+      });
+    }
+    if (actionId === "highlight") {
+      addHighlight({
+        id: Date.now().toString(),
+        bookId,
+        text,
+        color: "#fde047",
+        page: useStore.getState().currentPage,
+        createdAt: new Date().toISOString(),
+      });
+    }
+    if (actionId === "note") {
+      addNote({
+        id: Date.now().toString(),
+        bookId,
+        bookTitle: useStore.getState().books.find((b) => b.id === bookId)?.title || "",
+        text,
+        highlight: "highlight-yellow",
+        page: useStore.getState().currentPage,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        color: "#fde047",
       });
     }
     if (actionId === "define" || actionId === "explain") {
@@ -271,14 +466,14 @@ function AiDrawer({ text, action, onClose }) {
       if (action === "define") {
         setResponse({
           word: text,
-          meaning: "Showing great attention to detail; very careful and precise.",
-          partOfSpeech: "Adjective",
-          pronunciation: "/məˈtɪkjələs/",
-          synonyms: ["thorough", "careful", "precise"],
+          meaning: "Definition will be available when AI is connected.",
+          partOfSpeech: "—",
+          pronunciation: "",
+          synonyms: [],
         });
       } else {
         setResponse({
-          explanation: "This text discusses the concept of marginal gains — the idea that small, incremental improvements compound over time to produce remarkable results.",
+          explanation: "AI explanation will be available when connected to Gemini or OpenAI. Add your API key in .env.local.",
         });
       }
       setLoading(false);
@@ -287,46 +482,36 @@ function AiDrawer({ text, action, onClose }) {
   }, [text, action]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm lg:items-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm lg:items-center"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-lg rounded-t-2xl border bg-background p-6 shadow-xl animate-in slide-in-from-bottom duration-200 lg:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-semibold">{action === "define" ? "Definition" : "AI Explanation"}</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">✕</button>
+          <h3 className="font-semibold">
+            {action === "define" ? "Definition" : "AI Explanation"}
+          </h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            ✕
+          </button>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        ) : action === "define" ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">{response.word}</span>
-              <span className="text-sm text-muted-foreground">{response.partOfSpeech}</span>
-            </div>
-            {response.pronunciation && (
-              <p className="text-sm text-muted-foreground">{response.pronunciation}</p>
-            )}
-            <p className="text-sm">{response.meaning}</p>
-            {response.synonyms?.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">Synonyms</p>
-                <div className="flex flex-wrap gap-1">
-                  {response.synonyms.map((s) => (
-                    <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <div className="space-y-3">
+            <p className="text-sm font-medium">{text}</p>
             <div className="rounded-lg border-l-2 border-primary bg-primary/5 p-3">
-              <p className="text-sm">{response.explanation}</p>
+              <p className="text-sm text-muted-foreground">{response.meaning || response.explanation}</p>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Connect AI API in .env.local for real definitions
+            </p>
           </div>
         )}
       </div>
