@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StoreHydrator } from "@/components/store-hydrator";
 import { ServiceWorkerRegistration } from "@/components/sw-registration";
+import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
 const literata = Literata({
@@ -47,9 +48,11 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <StoreHydrator />
-            <ServiceWorkerRegistration />
-            {children}
+            <ToastProvider>
+              <StoreHydrator />
+              <ServiceWorkerRegistration />
+              {children}
+            </ToastProvider>
           </TooltipProvider>
         </ThemeProvider>
       </body>
