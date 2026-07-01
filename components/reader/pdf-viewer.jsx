@@ -170,7 +170,6 @@ export function PdfViewer({ bookId }) {
             className="max-w-full shadow-lg"
             role="img"
             aria-label={`Page ${currentPage} of ${book.totalPages}`}
-            style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
           />
         </div>
       )}
