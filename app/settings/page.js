@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, Bell, Shield, Palette, Info, Trash2, Download } from "lucide-react";
+import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -54,6 +54,43 @@ export default function SettingsPage() {
     a.download = `lumina-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.books) {
+          const existing = useStore.getState().books;
+          const existingIds = new Set(existing.map((b) => b.id));
+          const newBooks = data.books.filter((b) => !existingIds.has(b.id));
+          if (newBooks.length > 0) {
+            const store = useStore.getState();
+            newBooks.forEach((b) => store.addBook(b));
+          }
+        }
+        if (data.vocabulary) {
+          const store = useStore.getState();
+          data.vocabulary.forEach((w) => store.addVocabularyWord(w));
+        }
+        if (data.notes) {
+          const store = useStore.getState();
+          data.notes.forEach((n) => store.addNote(n));
+        }
+        if (data.highlights) {
+          const store = useStore.getState();
+          data.highlights.forEach((h) => store.addHighlight(h));
+        }
+        window.location.reload();
+      } catch {
+        alert("Invalid backup file");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   return (
@@ -163,6 +200,21 @@ export default function SettingsPage() {
                   <Button variant="outline" size="sm" onClick={handleExport}>
                     <Download className="h-4 w-4 mr-2" /> Export
                   </Button>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Import Data</p>
+                    <p className="text-xs text-muted-foreground">
+                      Restore from a previously exported backup
+                    </p>
+                  </div>
+                  <label>
+                    <Button variant="outline" size="sm" asChild>
+                      <span><Upload className="h-4 w-4 mr-2" /> Import</span>
+                    </Button>
+                    <input type="file" accept=".json" className="hidden" onChange={handleImport} />
+                  </label>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
