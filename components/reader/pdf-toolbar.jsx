@@ -12,19 +12,31 @@ import { useShallow } from "zustand/react/shallow";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
-  const { zoom, setZoom, currentPage, totalPages } = useStore(
+  const { zoom, setZoom, currentPage, totalPages, setCurrentPage } = useStore(
     useShallow((s) => ({
       zoom: s.zoom,
       setZoom: s.setZoom,
       currentPage: s.currentPage,
       totalPages: s.totalPages,
+      setCurrentPage: s.setCurrentPage,
     }))
   );
   const updateBook = useStore((s) => s.updateBook);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageInput, setPageInput] = useState("");
   const allBooks = useStore((s) => s.books);
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
+
+  const handlePageJump = (e) => {
+    if (e.key === "Enter") {
+      const page = parseInt(pageInput, 10);
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+      }
+      setPageInput("");
+    }
+  };
 
   return (
     <div className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -40,9 +52,25 @@ export function PdfToolbar({ bookId }) {
           </Button>
           <div className="min-w-0">
             <p className="text-sm font-medium truncate">{book?.title || "Document"}</p>
-            <p className="text-xs text-muted-foreground">
-              Page {currentPage} of {totalPages || "—"}
-            </p>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span>Page</span>
+              {totalPages > 0 ? (
+                <Input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  value={pageInput || currentPage}
+                  onChange={(e) => setPageInput(e.target.value)}
+                  onKeyDown={handlePageJump}
+                  onBlur={() => setPageInput("")}
+                  className="h-5 w-12 rounded border-none bg-transparent p-0 text-center text-xs focus-visible:ring-1"
+                  aria-label="Page number"
+                />
+              ) : (
+                <span>{currentPage}</span>
+              )}
+              <span>of {totalPages || "—"}</span>
+            </div>
           </div>
         </div>
 
