@@ -1,12 +1,22 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import useStore from "@/lib/store";
 
 export function GoalWidget() {
+  const sessions = useStore((s) => s.readingSessions);
+
+  const todayStats = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const todaySessions = sessions.filter((s) => s.date === today);
+    const pagesRead = todaySessions.reduce((sum, s) => sum + (s.pagesRead || 0), 0);
+    return pagesRead;
+  }, [sessions]);
+
   const goal = 20;
-  const read = 10;
-  const percentage = Math.round((read / goal) * 100);
+  const percentage = Math.min(100, Math.round((todayStats / goal) * 100));
   const circumference = 2 * Math.PI * 42;
   const dashoffset = circumference - (percentage / 100) * circumference;
 
@@ -42,19 +52,16 @@ export function GoalWidget() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-bold">{percentage}%</span>
+            <span className="text-xl font-bold">{todayStats}</span>
           </div>
         </div>
         <div className="flex-1">
           <p className="text-sm text-muted-foreground">
-            {read} of {goal} pages read
+            {todayStats} of {goal} pages today
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {goal - read} pages to go
+            {Math.max(0, goal - todayStats)} pages to go
           </p>
-          <Button size="sm" className="mt-3" variant="outline">
-            Update Progress
-          </Button>
         </div>
       </CardContent>
     </Card>

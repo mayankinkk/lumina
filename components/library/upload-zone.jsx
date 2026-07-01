@@ -1,45 +1,128 @@
 "use client";
 
-import { useCallback, useRef } from "react";
-import { Upload, FileText, FileType, Globe, Cloud } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useCallback, useRef, useState } from "react";
+import { Upload, Cloud, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import useStore from "@/lib/store";
 
 const importSources = [
-  { label: "Device", icon: Upload, description: "Upload from device" },
-  { label: "Google Drive", icon: Cloud, description: "Import from Drive" },
-  { label: "Dropbox", icon: Cloud, description: "Import from Dropbox" },
-  { label: "OneDrive", icon: Cloud, description: "Import from OneDrive" },
-  { label: "URL (PDF)", icon: Globe, description: "Import from URL" },
+  { label: "Device", icon: Upload },
+  { label: "Google Drive", icon: Cloud },
+  { label: "Dropbox", icon: Cloud },
+  { label: "OneDrive", icon: Cloud },
+  { label: "URL (PDF)", icon: Globe },
 ];
+
+async function loadPdfWorker() {
+  const pdfjsLib = await import("pdfjs-dist");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  return pdfjsLib;
+}
 
 export function UploadZone() {
   const addBook = useStore((s) => s.addBook);
   const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFileUpload = useCallback(
-    (e) => {
-      const files = Array.from(e.target.files || []);
-      files.forEach((file) => {
-        const format = file.name.split(".").pop().toLowerCase();
-        const newBook = {
+  const processFile = useCallback(
+    async (file) => {
+      const ext = file.name.split(".").pop().toLowerCase();
+
+      if (ext === "pdf") {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfjsLib = await loadPdfWorker();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
+        const totalPages = pdf.numPages;
+
+        let title = file.name.replace(/\.pdf$/i, "");
+        let author = "Unknown Author";
+
+        try {
+          const metadata = await pdf.getMetadata();
+          if (metadata?.info?.Title) title = metadata.info.Title;
+          if (metadata?.info?.Author) author = metadata.info.Author;
+        } catch {}
+
+        const book = {
           id: Date.now().toString(),
-          title: file.name.replace(/\.[^/.]+$/, ""),
-          author: "Unknown Author",
-          coverColor: "bg-indigo-100 dark:bg-indigo-900/30",
-          progress: 0,
-          totalPages: 0,
-          currentPage: 0,
+          title,
+          author,
+          format: "pdf",
           status: "reading",
+          totalPages,
+          currentPage: 0,
+          progress: 0,
           lastOpened: new Date().toISOString(),
-          format,
-          estimatedTimeLeft: "N/A",
+          dateAdded: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          fileData: arrayBuffer,
         };
-        addBook(newBook);
-      });
+
+        addBook(book);
+        return book;
+      }
+
+      if (ext === "txt") {
+        const text = await file.text();
+        const book = {
+          id: Date.now().toString(),
+          title: file.name.replace(/\.txt$/i, ""),
+          author: "Unknown Author",
+          format: "txt",
+          status: "reading",
+          totalPages: 1,
+          currentPage: 0,
+          progress: 0,
+          lastOpened: new Date().toISOString(),
+          dateAdded: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          textContent: text,
+        };
+
+        addBook(book);
+        return book;
+      }
+
+      const book = {
+        id: Date.now().toString(),
+        title: file.name.replace(/\.[^/.]+$/, ""),
+        author: "Unknown Author",
+        format: ext,
+        status: "want_to_read",
+        totalPages: 0,
+        currentPage: 0,
+        progress: 0,
+        lastOpened: null,
+        dateAdded: new Date().toISOString(),
+        fileName: file.name,
+        fileSize: file.size,
+      };
+
+      addBook(book);
+      return book;
     },
     [addBook]
+  );
+
+  const handleFileUpload = useCallback(
+    async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+
+      setUploading(true);
+      for (const file of files) {
+        try {
+          await processFile(file);
+        } catch (err) {
+          console.error("Failed to process file:", file.name, err);
+        }
+      }
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    [processFile]
   );
 
   return (
@@ -51,15 +134,15 @@ export function UploadZone() {
         >
           <Upload className="h-8 w-8 text-primary" />
         </div>
-        <p className="mt-3 text-sm font-medium">Drop files here or click to upload</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Supports PDF, EPUB, MOBI, TXT, DOCX
+        <p className="mt-3 text-sm font-medium">
+          {uploading ? "Processing files..." : "Drop files here or click to upload"}
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">Supports PDF and TXT files</p>
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.epub,.mobi,.txt,.docx"
+          accept=".pdf,.txt,.epub,.mobi,.docx"
           multiple
           onChange={handleFileUpload}
         />
@@ -69,6 +152,9 @@ export function UploadZone() {
             <button
               key={source.label}
               className="flex flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-colors hover:bg-accent"
+              onClick={() => {
+                if (source.label === "Device") fileInputRef.current?.click();
+              }}
             >
               <source.icon className="h-4 w-4 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground text-center leading-tight">

@@ -5,12 +5,50 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, ChevronRight } from "lucide-react";
+import { Clock, ChevronRight, BookOpen } from "lucide-react";
 import useStore from "@/lib/store";
+
+const coverColors = [
+  "bg-amber-100 dark:bg-amber-900/30",
+  "bg-blue-100 dark:bg-blue-900/30",
+  "bg-green-100 dark:bg-green-900/30",
+  "bg-purple-100 dark:bg-purple-900/30",
+  "bg-rose-100 dark:bg-rose-900/30",
+  "bg-stone-100 dark:bg-stone-900/30",
+  "bg-indigo-100 dark:bg-indigo-900/30",
+  "bg-teal-100 dark:bg-teal-900/30",
+];
+
+function getCoverColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return coverColors[Math.abs(hash) % coverColors.length];
+}
 
 export function ContinueReading() {
   const allBooks = useStore((s) => s.books);
   const books = useMemo(() => allBooks.filter((b) => b.status === "reading"), [allBooks]);
+
+  if (books.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Continue Reading</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <BookOpen className="h-10 w-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">No books in progress</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Upload a book and start reading
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -30,7 +68,7 @@ export function ContinueReading() {
               href={`/reader/${book.id}`}
               className="group min-w-[200px] flex-1"
             >
-              <div className={`aspect-[3/4] rounded-lg ${book.coverColor} flex items-center justify-center p-4 transition-transform group-hover:scale-[1.02]`}>
+              <div className={`aspect-[3/4] rounded-lg ${getCoverColor(book.title)} flex items-center justify-center p-4 transition-transform group-hover:scale-[1.02]`}>
                 <div className="text-center">
                   <p className="font-literata text-sm font-semibold leading-tight">
                     {book.title}
@@ -45,7 +83,7 @@ export function ContinueReading() {
                   <span className="font-medium">{book.progress}%</span>
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    {book.estimatedTimeLeft}
+                    {book.currentPage}/{book.totalPages}
                   </span>
                 </div>
                 <Progress value={book.progress} className="h-1.5" />
