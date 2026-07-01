@@ -41,7 +41,7 @@ export default function VocabularyPage() {
     return (
       <ShellLayout>
         <FlashcardMode
-          words={filtered}
+          words={dueWords.length > 0 ? dueWords : filtered}
           onReview={handleReview}
           onExit={() => setFlashcardMode(false)}
         />
@@ -68,8 +68,8 @@ export default function VocabularyPage() {
                   <Badge variant="secondary">{vocabulary.length} words</Badge>
                 </div>
                 {dueWords.length > 0 && <p className="text-xs text-muted-foreground">{dueWords.length} due for review</p>}
-                <Button className="w-full" disabled={filtered.length === 0} onClick={() => setFlashcardMode(true)}>
-                  <Play className="h-4 w-4 mr-2" /> Practice
+                <Button className="w-full" disabled={vocabulary.length === 0} onClick={() => setFlashcardMode(true)}>
+                  <Play className="h-4 w-4 mr-2" /> Practice {dueWords.length > 0 ? `(${dueWords.length} due)` : ""}
                 </Button>
               </CardContent>
             </Card>
