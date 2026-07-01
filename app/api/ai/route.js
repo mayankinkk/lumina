@@ -11,7 +11,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const { text, action } = body;
+    const { text, action, targetLanguage } = body;
 
     if (text.length === 0) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
@@ -44,7 +44,7 @@ export async function POST(request) {
       explain: `Explain the following text simply and clearly:\n\n"${text}"`,
       explain_simple: `Explain the following text like I'm 12 years old:\n\n"${text}"`,
       summarize: `Summarize the following text in 2-3 sentences:\n\n"${text}"`,
-      translate: `Translate the following text to English. If it's already English, translate to Spanish. Provide the translation:\n\n"${text}"`,
+      translate: `Translate the following text to ${targetLanguage || "Spanish"}. Provide only the translation:\n\n"${text}"`,
       examples: `Generate 3 practical real-world examples related to this concept:\n\n"${text}"`,
     };
 
