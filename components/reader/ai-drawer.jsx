@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import useStore from "@/lib/store";
 
 export function AiDrawer({ text, action, onClose }) {
   const [response, setResponse] = useState(null);

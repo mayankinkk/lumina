@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const MAX_TEXT_LENGTH = 5000;
-const VALID_ACTIONS = ["explain", "explain_simple", "summarize", "translate", "examples"];
+const VALID_ACTIONS = ["define", "explain", "explain_simple", "summarize", "translate", "examples"];
 
 export async function POST(request) {
   try {
@@ -40,31 +40,27 @@ export async function POST(request) {
     }
 
     const prompts = {
+      define: `Define the following word or phrase. Give: part of speech, pronunciation (if known), meaning, 2 synonyms, 2 antonyms, and etymology if known. Format as JSON with keys: meaning, partOfSpeech, pronunciation, synonyms, antonyms, etymology.\n\n"${text}"`,
       explain: `Explain the following text simply and clearly:\n\n"${text}"`,
       explain_simple: `Explain the following text like I'm 12 years old:\n\n"${text}"`,
       summarize: `Summarize the following text in 2-3 sentences:\n\n"${text}"`,
-      translate: `Translate the following text to English (or to the language detected if already English). Provide the translation:\n\n"${text}"`,
+      translate: `Translate the following text to English. If it's already English, translate to Spanish. Provide the translation:\n\n"${text}"`,
       examples: `Generate 3 practical real-world examples related to this concept:\n\n"${text}"`,
     };
 
     const prompt = prompts[action];
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      }
-    );
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+    });
 
     if (!response.ok) {
-      console.error("AI API error:", response.status);
       return NextResponse.json(
         { error: "Failed to get AI response" },
         { status: 502 }
@@ -77,7 +73,6 @@ export async function POST(request) {
 
     return NextResponse.json({ result });
   } catch (error) {
-    console.error("AI route error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
