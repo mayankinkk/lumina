@@ -26,7 +26,7 @@ export function ContextMenuPopup({ text, bookId }) {
       navigator.clipboard.writeText(text);
     }
     if (actionId === "save") {
-      addVocabularyWord({
+      const newWord = {
         id: crypto.randomUUID(),
         word: text,
         partOfSpeech: "Unknown",
@@ -40,7 +40,10 @@ export function ContextMenuPopup({ text, bookId }) {
         etymology: "",
         nextReview: new Date(Date.now() + 86400000).toISOString(),
         dateAdded: new Date().toISOString(),
-      });
+      };
+      addVocabularyWord(newWord);
+      setActiveAction("define");
+      setShowAiDrawer(true);
     }
     if (actionId === "highlight") {
       addHighlight({

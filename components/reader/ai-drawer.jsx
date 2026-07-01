@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import useStore from "@/lib/store";
 
 export function AiDrawer({ text, action, onClose }) {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const vocabulary = useStore((s) => s.vocabulary);
+  const updateVocabularyWord = useStore((s) => s.updateVocabularyWord);
 
   useEffect(() => {
     let cancelled = false;
@@ -30,6 +33,26 @@ export function AiDrawer({ text, action, onClose }) {
           setError(data.error || "Failed to get AI response");
         } else {
           setResponse({ result: data.result });
+
+          if (action === "define") {
+            try {
+              const jsonMatch = data.result.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                const word = vocabulary.find((w) => w.word.toLowerCase() === text.toLowerCase());
+                if (word) {
+                  updateVocabularyWord(word.id, {
+                    meaning: parsed.meaning || word.meaning,
+                    partOfSpeech: parsed.partOfSpeech || word.partOfSpeech,
+                    pronunciation: parsed.pronunciation || word.pronunciation,
+                    synonyms: parsed.synonyms || word.synonyms,
+                    antonyms: parsed.antonyms || word.antonyms,
+                    etymology: parsed.etymology || word.etymology,
+                  });
+                }
+              }
+            } catch {}
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -42,7 +65,7 @@ export function AiDrawer({ text, action, onClose }) {
 
     fetchAi();
     return () => { cancelled = true; };
-  }, [text, action]);
+  }, [text, action, vocabulary, updateVocabularyWord]);
 
   return (
     <div
@@ -79,6 +102,9 @@ export function AiDrawer({ text, action, onClose }) {
             <div className="rounded-lg border-l-2 border-primary bg-primary/5 p-3">
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{response?.result}</p>
             </div>
+            {action === "define" && (
+              <p className="text-xs text-green-600 dark:text-green-400">Vocabulary auto-filled</p>
+            )}
           </div>
         )}
       </div>
