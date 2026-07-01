@@ -1,8 +1,35 @@
 import { NextResponse } from "next/server";
 
+const MAX_TEXT_LENGTH = 5000;
+const VALID_ACTIONS = ["explain", "explain_simple", "summarize", "translate", "examples"];
+
 export async function POST(request) {
   try {
-    const { text, action } = await request.json();
+    const body = await request.json();
+
+    if (!body || typeof body.text !== "string" || typeof body.action !== "string") {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
+    const { text, action } = body;
+
+    if (text.length === 0) {
+      return NextResponse.json({ error: "Text is required" }, { status: 400 });
+    }
+
+    if (text.length > MAX_TEXT_LENGTH) {
+      return NextResponse.json(
+        { error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` },
+        { status: 400 }
+      );
+    }
+
+    if (!VALID_ACTIONS.includes(action)) {
+      return NextResponse.json(
+        { error: `Invalid action. Must be one of: ${VALID_ACTIONS.join(", ")}` },
+        { status: 400 }
+      );
+    }
 
     const apiKey = process.env.AI_API_KEY;
     if (!apiKey) {
@@ -20,14 +47,16 @@ export async function POST(request) {
       examples: `Generate 3 practical real-world examples related to this concept:\n\n"${text}"`,
     };
 
-    const prompt = prompts[action] || prompts.explain;
+    const prompt = prompts[action];
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
-        apiKey,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
         }),
@@ -35,8 +64,7 @@ export async function POST(request) {
     );
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("AI API error:", error);
+      console.error("AI API error:", response.status);
       return NextResponse.json(
         { error: "Failed to get AI response" },
         { status: 502 }
