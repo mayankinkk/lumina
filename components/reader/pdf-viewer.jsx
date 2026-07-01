@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ZoomIn, ZoomOut, Search, Bookmark, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
-  const { zoom, setZoom, currentPage, totalPages, setCurrentPage } = useStore();
+  const { zoom, setZoom, currentPage, totalPages } = useStore(
+    useShallow((s) => ({ zoom: s.zoom, setZoom: s.setZoom, currentPage: s.currentPage, totalPages: s.totalPages }))
+  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const book = useStore((s) => s.books.find((b) => b.id === bookId));
+  const allBooks = useStore((s) => s.books);
+  const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
 
   const goBack = () => router.push("/library");
 
@@ -74,8 +78,11 @@ export function PdfToolbar({ bookId }) {
 }
 
 export function PdfViewer({ bookId }) {
-  const { zoom, currentPage, setCurrentPage, setTotalPages } = useStore();
-  const book = useStore((s) => s.books.find((b) => b.id === bookId));
+  const { zoom, currentPage, setCurrentPage, setTotalPages } = useStore(
+    useShallow((s) => ({ zoom: s.zoom, currentPage: s.currentPage, setCurrentPage: s.setCurrentPage, setTotalPages: s.setTotalPages }))
+  );
+  const allBooks = useStore((s) => s.books);
+  const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
   const [selectedText, setSelectedText] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
   const containerRef = useRef(null);

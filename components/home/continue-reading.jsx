@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,8 @@ import { Clock, ChevronRight } from "lucide-react";
 import useStore from "@/lib/store";
 
 export function ContinueReading() {
-  const books = useStore((s) => s.books.filter((b) => b.status === "reading"));
+  const allBooks = useStore((s) => s.books);
+  const books = useMemo(() => allBooks.filter((b) => b.status === "reading"), [allBooks]);
 
   return (
     <Card>

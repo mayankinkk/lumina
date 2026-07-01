@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ShellLayout from "@/components/layout/shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Search, Plus, Edit3, Trash2, BookOpen } from "lucide-react";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 
 const highlightColors = [
   { label: "Yellow", value: "#fde047" },
@@ -26,7 +27,9 @@ const highlightColors = [
 ];
 
 export default function NotesPage() {
-  const { notes, addNote, updateNote, deleteNote } = useStore();
+  const { notes, addNote, updateNote, deleteNote } = useStore(
+    useShallow((s) => ({ notes: s.notes, addNote: s.addNote, updateNote: s.updateNote, deleteNote: s.deleteNote }))
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);

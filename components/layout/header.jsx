@@ -7,6 +7,7 @@ import { Menu, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -19,7 +20,9 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
-  const { toggleSidebar } = useStore();
+  const { toggleSidebar } = useStore(
+    useShallow((s) => ({ toggleSidebar: s.toggleSidebar }))
+  );
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

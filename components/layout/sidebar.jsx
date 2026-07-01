@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -27,7 +28,9 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { sidebarOpen, closeSidebar } = useStore();
+  const { sidebarOpen, closeSidebar } = useStore(
+    useShallow((s) => ({ sidebarOpen: s.sidebarOpen, closeSidebar: s.closeSidebar }))
+  );
 
   return (
     <>
