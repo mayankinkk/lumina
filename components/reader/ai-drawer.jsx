@@ -55,7 +55,7 @@ export function AiDrawer({ text, action, onClose }) {
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">
-            {action === "define" ? "Definition" : "AI Explanation"}
+            {action === "define" ? "Definition" : action === "translate" ? "Translation" : "AI Explanation"}
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             ✕

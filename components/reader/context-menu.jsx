@@ -65,7 +65,7 @@ export function ContextMenuPopup({ text, bookId }) {
         color: "#fde047",
       });
     }
-    if (actionId === "define" || actionId === "explain") {
+    if (actionId === "define" || actionId === "explain" || actionId === "translate") {
       setActiveAction(actionId);
       setShowAiDrawer(true);
     }
