@@ -1,6 +1,7 @@
 import { Literata, Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { StoreHydrator } from "@/components/store-hydrator";
 import "./globals.css";
 
 const literata = Literata({
@@ -44,7 +45,10 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <StoreHydrator />
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
