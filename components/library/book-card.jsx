@@ -6,25 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Clock, CheckCircle2, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const coverColors = [
-  "bg-amber-100 dark:bg-amber-900/30",
-  "bg-blue-100 dark:bg-blue-900/30",
-  "bg-green-100 dark:bg-green-900/30",
-  "bg-purple-100 dark:bg-purple-900/30",
-  "bg-rose-100 dark:bg-rose-900/30",
-  "bg-stone-100 dark:bg-stone-900/30",
-  "bg-indigo-100 dark:bg-indigo-900/30",
-  "bg-teal-100 dark:bg-teal-900/30",
-];
-
-function getCoverColor(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return coverColors[Math.abs(hash) % coverColors.length];
-}
+import { getCoverColor } from "@/lib/cover-colors";
 
 export function BookCard({ book }) {
   const statusConfig = {
