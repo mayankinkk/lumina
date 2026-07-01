@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import useStore from "@/lib/store";
+import { useToast } from "@/components/toast";
 
 async function loadPdfWorker() {
   const pdfjsLib = await import("pdfjs-dist");
@@ -13,6 +14,7 @@ async function loadPdfWorker() {
 
 export function UploadZone() {
   const addBook = useStore((s) => s.addBook);
+  const { toast } = useToast();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
 
