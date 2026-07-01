@@ -20,6 +20,16 @@ export function UploadZone() {
     async (file) => {
       const ext = file.name.split(".").pop().toLowerCase();
 
+      if (!["pdf", "txt"].includes(ext)) {
+        toast("Unsupported file format. Please upload PDF or TXT files.", "warning");
+        return;
+      }
+
+      if (file.size > 100 * 1024 * 1024) {
+        toast("File too large. Maximum size is 100MB.", "warning");
+        return;
+      }
+
       if (ext === "pdf") {
         const arrayBuffer = await file.arrayBuffer();
         const pdfjsLib = await loadPdfWorker();
