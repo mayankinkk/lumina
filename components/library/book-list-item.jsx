@@ -6,14 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Clock, CheckCircle2, BookOpen, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
 
 export function BookListItem({ book }) {
   const removeBook = useStore((s) => s.removeBook);
+  const updateBook = useStore((s) => s.updateBook);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState(book.title);
+  const [editAuthor, setEditAuthor] = useState(book.author);
 
   const statusConfig = {
     reading: { label: "READING", icon: BookOpen, className: "text-green-600 dark:text-green-400" },
@@ -65,13 +70,10 @@ export function BookListItem({ book }) {
             <div className="flex items-center gap-2 shrink-0">
               {status.icon && <status.icon className={cn("h-3.5 w-3.5", status.className)} />}
               <span className={cn("text-xs", status.className)}>{status.label}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => { e.preventDefault(); setConfirmOpen(true); }}
-                aria-label={`Delete ${book.title}`}
-              >
+              <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); setEditTitle(book.title); setEditAuthor(book.author); setEditOpen(true); }} aria-label={`Edit ${book.title}`}>
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); setConfirmOpen(true); }} aria-label={`Delete ${book.title}`}>
                 <Trash2 className="h-3.5 w-3.5 text-destructive" />
               </Button>
             </div>
@@ -79,14 +81,30 @@ export function BookListItem({ book }) {
         </Link>
       </div>
 
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Edit Book Details</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium" htmlFor="el-title">Title</label>
+              <Input id="el-title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="el-author">Author</label>
+              <Input id="el-author" value={editAuthor} onChange={(e) => setEditAuthor(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={() => { updateBook(book.id, { title: editTitle.trim() || book.title, author: editAuthor.trim() || "Unknown Author" }); setEditOpen(false); }}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete book?</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            &quot;{book.title}&quot; will be permanently removed from your library. This action cannot be undone.
-          </p>
+          <DialogHeader><DialogTitle>Delete book?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">&quot;{book.title}&quot; will be permanently removed. This action cannot be undone.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={() => { removeBook(book.id); setConfirmOpen(false); }}>Delete</Button>
