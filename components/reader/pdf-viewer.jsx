@@ -55,13 +55,18 @@ export function PdfViewer({ bookId }) {
       try {
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-        let data = fileData;
-        if (data instanceof ArrayBuffer) {
-          data = new Uint8Array(data);
-        } else if (!(data instanceof Uint8Array)) {
-          data = new Uint8Array(data);
+        let bytes;
+        if (fileData instanceof ArrayBuffer) {
+          bytes = new Uint8Array(new ArrayBuffer(fileData.byteLength));
+          bytes.set(new Uint8Array(fileData));
+        } else if (fileData instanceof Uint8Array) {
+          bytes = new Uint8Array(new ArrayBuffer(fileData.byteLength));
+          bytes.set(fileData);
+        } else {
+          bytes = new Uint8Array(new ArrayBuffer(fileData.byteLength));
+          bytes.set(new Uint8Array(fileData));
         }
-        const pdf = await pdfjsLib.getDocument({ data }).promise;
+        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
         if (cancelled) return;
         pdfDocRef.current = pdf;
         setTotalPages(pdf.numPages);
