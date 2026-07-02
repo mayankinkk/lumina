@@ -10,7 +10,7 @@ import { TxtViewer } from "./txt-viewer";
 import { ContextMenuPopup } from "./context-menu";
 
 export function PdfViewer({ bookId }) {
-  const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook } = useStore(
+  const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook, hydrated } = useStore(
     useShallow((s) => ({
       zoom: s.zoom,
       currentPage: s.currentPage,
@@ -19,6 +19,7 @@ export function PdfViewer({ bookId }) {
       allBooks: s.books,
       loadFileData: s.loadFileData,
       updateBook: s.updateBook,
+      hydrated: s._hydrated,
     }))
   );
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
@@ -33,7 +34,7 @@ export function PdfViewer({ bookId }) {
   const [contextMenu, setContextMenu] = useState(null);
 
   useEffect(() => {
-    if (!book) return;
+    if (!book || !hydrated) return;
     let cancelled = false;
 
     async function loadPdf() {
@@ -67,7 +68,7 @@ export function PdfViewer({ bookId }) {
 
     loadPdf();
     return () => { cancelled = true; };
-  }, [bookId, book, loadFileData, setTotalPages, setCurrentPage]);
+  }, [bookId, book, hydrated, loadFileData, setTotalPages, setCurrentPage]);
 
   useEffect(() => {
     if (!pdfDocRef.current || loading || currentPage < 1) return;
@@ -144,6 +145,14 @@ export function PdfViewer({ bookId }) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <p className="text-muted-foreground">Book not found</p>
+      </div>
+    );
+  }
+
+  if (!hydrated) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
