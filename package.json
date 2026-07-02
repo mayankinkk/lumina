@@ -13,6 +13,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "epubjs": "^0.3.93",
     "idb-keyval": "^6.2.6",
     "lucide-react": "^1.22.0",
     "next": "16.2.9",

@@ -24,8 +24,8 @@ export function UploadZone() {
     async (file) => {
       const ext = file.name.split(".").pop().toLowerCase();
 
-      if (!["pdf", "txt"].includes(ext)) {
-        toast("Unsupported file format. Please upload PDF or TXT files.", "warning");
+      if (!["pdf", "txt", "epub"].includes(ext)) {
+        toast("Unsupported file format. Please upload PDF, EPUB, or TXT files.", "warning");
         return;
       }
 
@@ -65,6 +65,27 @@ export function UploadZone() {
           fileData: arrayBuffer,
         };
 
+        addBook(book);
+        return book;
+      }
+
+      if (ext === "epub") {
+        const arrayBuffer = await file.arrayBuffer();
+        const book = {
+          id: crypto.randomUUID(),
+          title: file.name.replace(/\.epub$/i, ""),
+          author: "Unknown Author",
+          format: "epub",
+          status: "reading",
+          totalPages: 0,
+          currentPage: 0,
+          progress: 0,
+          lastOpened: new Date().toISOString(),
+          dateAdded: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          fileData: arrayBuffer,
+        };
         addBook(book);
         return book;
       }
@@ -154,12 +175,12 @@ export function UploadZone() {
         <p className="mt-3 text-sm font-medium">
           {uploading ? "Processing files..." : "Drop files here or click to upload"}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">Supports PDF and TXT files up to 100MB</p>
+        <p className="mt-1 text-xs text-muted-foreground">Supports PDF, EPUB, and TXT files up to 100MB</p>
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.txt"
+          accept=".pdf,.txt,.epub"
           multiple
           onChange={handleFileUpload}
         />

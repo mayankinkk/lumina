@@ -135,7 +135,7 @@ export default function LibraryPage() {
 
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <span>Supported formats:</span>
-          {["PDF", "TXT"].map((fmt) => (
+          {["PDF", "EPUB", "TXT"].map((fmt) => (
             <Badge key={fmt} variant="secondary" className="text-[10px]">
               {fmt}
             </Badge>

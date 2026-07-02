@@ -7,6 +7,7 @@ import useStore from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { PdfToolbar } from "./pdf-toolbar";
 import { TxtViewer } from "./txt-viewer";
+import { EpubViewer } from "./epub-viewer";
 import { ContextMenuPopup } from "./context-menu";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { ReadingRuler } from "./reading-ruler";
@@ -280,6 +281,10 @@ export function PdfViewer({ bookId }) {
 
   if (book.format === "txt") {
     return <TxtViewer bookId={bookId} book={book} zoom={zoom} />;
+  }
+
+  if (book.format === "epub") {
+    return <EpubViewer bookId={bookId} book={book} />;
   }
 
   return (
