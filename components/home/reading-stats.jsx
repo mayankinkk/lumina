@@ -10,7 +10,7 @@ export function ReadingStats() {
   const books = useStore((s) => s.books);
 
   const stats = useMemo(() => {
-    const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const totalMinutes = sessions.reduce((sum, s) => sum + (s.minutes || 0), 0);
     const hours = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
 
@@ -19,7 +19,7 @@ export function ReadingStats() {
 
     const today = new Date().toISOString().slice(0, 10);
     const todaySessions = sessions.filter((s) => s.date === today);
-    const todayMinutes = todaySessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const todayMinutes = todaySessions.reduce((sum, s) => sum + (s.minutes || 0), 0);
 
     const uniqueDays = new Set(sessions.map((s) => s.date)).size;
 

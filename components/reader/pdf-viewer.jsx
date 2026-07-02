@@ -10,18 +10,18 @@ import { TxtViewer } from "./txt-viewer";
 import { ContextMenuPopup } from "./context-menu";
 
 export function PdfViewer({ bookId }) {
-  const { zoom, currentPage, setCurrentPage, setTotalPages } = useStore(
+  const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook } = useStore(
     useShallow((s) => ({
       zoom: s.zoom,
       currentPage: s.currentPage,
       setCurrentPage: s.setCurrentPage,
       setTotalPages: s.setTotalPages,
+      allBooks: s.books,
+      loadFileData: s.loadFileData,
+      updateBook: s.updateBook,
     }))
   );
-  const allBooks = useStore((s) => s.books);
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
-  const loadFileData = useStore((s) => s.loadFileData);
-  const updateBook = useStore((s) => s.updateBook);
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -78,24 +78,36 @@ export function PdfViewer({ bookId }) {
       renderingRef.current = true;
       try {
         const pdf = pdfDocRef.current;
-        if (!pdf || cancelled) return;
+        if (!pdf || cancelled) {
+          renderingRef.current = false;
+          return;
+        }
         const page = await pdf.getPage(currentPage);
-        if (cancelled) return;
+        if (cancelled) {
+          renderingRef.current = false;
+          return;
+        }
         const scale = (zoom / 100) * 1.5;
         const viewport = page.getViewport({ scale });
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!canvas) {
+          renderingRef.current = false;
+          return;
+        }
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
-        if (!cancelled && book) {
-          updateBook(bookId, {
-            currentPage,
-            progress: book.totalPages > 0 ? Math.round((currentPage / book.totalPages) * 100) : 0,
-            lastOpened: new Date().toISOString(),
-          });
+        if (!cancelled) {
+          const currentBook = useStore.getState().books.find((b) => b.id === bookId);
+          if (currentBook) {
+            updateBook(bookId, {
+              currentPage,
+              progress: currentBook.totalPages > 0 ? Math.round((currentPage / currentBook.totalPages) * 100) : 0,
+              lastOpened: new Date().toISOString(),
+            });
+          }
         }
       } catch {
       } finally {
@@ -103,7 +115,7 @@ export function PdfViewer({ bookId }) {
       }
     }
     renderPage();
-  }, [currentPage, zoom, loading, bookId, book, updateBook]);
+  }, [currentPage, zoom, loading, bookId, updateBook]);
 
   const handleTextSelection = useCallback(() => {
     const selection = window.getSelection();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useStore from "@/lib/store";
@@ -27,6 +27,11 @@ export function AiDrawer({ text, action, onClose }) {
   const [targetLang, setTargetLang] = useState("Spanish");
   const vocabulary = useStore((s) => s.vocabulary);
   const updateVocabularyWord = useStore((s) => s.updateVocabularyWord);
+  // Keep a ref so the effect can read current vocab without it being a dependency
+  const vocabRef = useRef(vocabulary);
+  const updateVocabRef = useRef(updateVocabularyWord);
+  useEffect(() => { vocabRef.current = vocabulary; }, [vocabulary]);
+  useEffect(() => { updateVocabRef.current = updateVocabularyWord; }, [updateVocabularyWord]);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,12 +61,12 @@ export function AiDrawer({ text, action, onClose }) {
 
           if (action === "define") {
             try {
-              const jsonMatch = data.result.match(/\{[\s\S]*\}/);
+              const jsonMatch = data.result.match(/{[\s\S]*}/);
               if (jsonMatch) {
                 const parsed = JSON.parse(jsonMatch[0]);
-                const word = vocabulary.find((w) => w.word.toLowerCase() === text.toLowerCase());
+                const word = vocabRef.current.find((w) => w.word.toLowerCase() === text.toLowerCase());
                 if (word) {
-                  updateVocabularyWord(word.id, {
+                  updateVocabRef.current(word.id, {
                     meaning: parsed.meaning || word.meaning,
                     partOfSpeech: parsed.partOfSpeech || word.partOfSpeech,
                     pronunciation: parsed.pronunciation || word.pronunciation,
@@ -83,7 +88,7 @@ export function AiDrawer({ text, action, onClose }) {
 
     fetchAi();
     return () => { cancelled = true; };
-  }, [text, action, targetLang, vocabulary, updateVocabularyWord]);
+  }, [text, action, targetLang]);
 
   const titles = { define: "Definition", translate: "Translation", explain: "AI Explanation" };
 
