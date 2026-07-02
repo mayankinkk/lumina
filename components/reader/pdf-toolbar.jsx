@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import useStore from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
+import { TtsControls } from "./tts-controls";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
@@ -36,7 +37,12 @@ export function PdfToolbar({ bookId }) {
     }))
   );
   const allBooks = useStore((s) => s.books);
+  const fileCache = useStore((s) => s.fileCache);
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
+  const textContent = useMemo(() => {
+    if (book?.format === "txt") return fileCache[bookId] || "";
+    return "";
+  }, [book, fileCache, bookId]);
   const [autoScrollOpen, setAutoScrollOpen] = useState(false);
 
   const handlePageJump = (e) => {
@@ -120,6 +126,7 @@ export function PdfToolbar({ bookId }) {
               <span className="hidden sm:inline">Finish</span>
             </Button>
           )}
+          <TtsControls content={textContent} />
           <div className="relative">
             <Button
               variant={autoScrollMode !== "off" ? "default" : "ghost"}

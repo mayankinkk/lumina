@@ -3,11 +3,13 @@
 import { useState } from "react";
 import useStore from "@/lib/store";
 import { AiDrawer } from "./ai-drawer";
+import { useTts } from "@/hooks/use-tts";
 
 const actions = [
   { label: "Define", icon: "📖", id: "define" },
   { label: "Explain", icon: "💡", id: "explain" },
   { label: "Translate", icon: "🌐", id: "translate" },
+  { label: "Read", icon: "🔊", id: "read" },
   { label: "Highlight", icon: "🖍️", id: "highlight" },
   { label: "Note", icon: "📝", id: "note" },
   { label: "Copy", icon: "📋", id: "copy" },
@@ -20,6 +22,7 @@ export function ContextMenuPopup({ text, bookId }) {
   const addVocabularyWord = useStore((s) => s.addVocabularyWord);
   const addHighlight = useStore((s) => s.addHighlight);
   const addNote = useStore((s) => s.addNote);
+  const { speak, stop, speaking } = useTts();
 
   const handleAction = (actionId) => {
     if (actionId === "copy") {
@@ -67,6 +70,10 @@ export function ContextMenuPopup({ text, bookId }) {
         updatedAt: new Date().toISOString(),
         color: "#fde047",
       });
+    }
+    if (actionId === "read") {
+      if (speaking) stop();
+      speak(text);
     }
     if (actionId === "define" || actionId === "explain" || actionId === "translate") {
       setActiveAction(actionId);
