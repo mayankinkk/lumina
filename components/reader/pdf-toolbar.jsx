@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,12 +28,16 @@ export function PdfToolbar({ bookId }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageInput, setPageInput] = useState("");
-  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed } = useStore(
+  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed } = useStore(
     useShallow((s) => ({
       autoScrollMode: s.autoScrollMode,
       autoScrollSpeed: s.autoScrollSpeed,
       setAutoScrollMode: s.setAutoScrollMode,
       setAutoScrollSpeed: s.setAutoScrollSpeed,
+      pageAnimation: s.pageAnimation,
+      pageAnimationSpeed: s.pageAnimationSpeed,
+      setPageAnimation: s.setPageAnimation,
+      setPageAnimationSpeed: s.setPageAnimationSpeed,
     }))
   );
   const allBooks = useStore((s) => s.books);
@@ -44,6 +48,7 @@ export function PdfToolbar({ bookId }) {
     return "";
   }, [book, fileCache, bookId]);
   const [autoScrollOpen, setAutoScrollOpen] = useState(false);
+  const [pageAnimOpen, setPageAnimOpen] = useState(false);
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -127,6 +132,55 @@ export function PdfToolbar({ bookId }) {
             </Button>
           )}
           <TtsControls content={textContent} />
+          <div className="relative">
+            <Button
+              variant={pageAnimation !== "none" ? "secondary" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setPageAnimOpen(!pageAnimOpen)}
+              aria-label="Page animation"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
+            {pageAnimOpen && (
+              <div className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
+                <div className="space-y-3">
+                  <Label className="text-xs font-medium">Page Animation</Label>
+                  <div className="grid grid-cols-3 gap-1">
+                    {[
+                      { value: "none", label: "None" },
+                      { value: "slide", label: "Slide" },
+                      { value: "fade", label: "Fade" },
+                      { value: "flip", label: "Flip" },
+                      { value: "curl", label: "Curl" },
+                    ].map((a) => (
+                      <Button
+                        key={a.value}
+                        variant={pageAnimation === a.value ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[10px] px-1"
+                        onClick={() => { setPageAnimation(a.value); setPageAnimOpen(false); }}
+                      >
+                        {a.label}
+                      </Button>
+                    ))}
+                  </div>
+                  {pageAnimation !== "none" && (
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">Speed: {pageAnimationSpeed}ms</Label>
+                      <Slider
+                        min={100}
+                        max={800}
+                        step={50}
+                        value={[pageAnimationSpeed]}
+                        onValueChange={([v]) => setPageAnimationSpeed(v)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="relative">
             <Button
               variant={autoScrollMode !== "off" ? "default" : "ghost"}

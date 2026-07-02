@@ -25,18 +25,22 @@ export function PdfViewer({ bookId }) {
   );
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
 
+  const pageAnimation = useStore((s) => s.pageAnimation);
+  const pageAnimationSpeed = useStore((s) => s.pageAnimationSpeed);
+
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const pdfDocRef = useRef(null);
   const renderTaskIdRef = useRef(0);
-  const activeRenderTaskRef = useRef(null); // holds the live pdfjs RenderTask for cancellation
+  const activeRenderTaskRef = useRef(null);
+  const prevPageRef = useRef(currentPage);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Timestamp bumped after PDF loads — guarantees render effect fires even if currentPage stays at 1
   const [pdfLoadedAt, setPdfLoadedAt] = useState(null);
   const [selectedText, setSelectedText] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
+  const [pageAnimClass, setPageAnimClass] = useState("");
 
   // Load PDF into memory
   useEffect(() => {
@@ -190,6 +194,28 @@ export function PdfViewer({ bookId }) {
 
   useAutoScroll(containerRef, { isTxt: false });
 
+  useEffect(() => {
+    if (!pdfLoadedAt || pageAnimation === "none") return;
+    const prev = prevPageRef.current;
+    prevPageRef.current = currentPage;
+    const forward = currentPage > prev;
+    let cls = "";
+    if (pageAnimation === "slide") {
+      cls = forward ? "animate-page-slide-forward" : "animate-page-slide-backward";
+    } else if (pageAnimation === "fade") {
+      cls = "animate-page-fade";
+    } else if (pageAnimation === "flip") {
+      cls = "animate-page-flip";
+    } else if (pageAnimation === "curl") {
+      cls = "animate-page-curl";
+    }
+    if (cls) {
+      setPageAnimClass(cls);
+      const timer = setTimeout(() => setPageAnimClass(""), pageAnimationSpeed);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, pageAnimation, pageAnimationSpeed, pdfLoadedAt]);
+
   if (!book) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -235,8 +261,8 @@ export function PdfViewer({ bookId }) {
       {/* Always keep canvas mounted so page turns don't cause a blank flash.
           Use visibility (not display:none) to preserve canvas dimensions. */}
       <div
-        className="flex justify-center py-4 px-2"
-        style={{ visibility: loading || error ? "hidden" : "visible" }}
+        className={`flex justify-center py-4 px-2 ${pageAnimClass} animate-page-enter`}
+        style={{ visibility: loading || error ? "hidden" : "visible", animationDuration: pageAnimation === "none" ? "0ms" : undefined }}
       >
         <canvas
           ref={canvasRef}
