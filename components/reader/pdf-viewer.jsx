@@ -34,6 +34,11 @@ export function PdfViewer({ bookId }) {
   const blueLightFilter = useStore((s) => s.blueLightFilter);
   const readerTheme = useStore((s) => s.readerTheme);
   const readerBackground = useStore((s) => s.readerBackground);
+  const searchQuery = useStore((s) => s.searchQuery);
+  const searchResults = useStore((s) => s.searchResults);
+  const searchCurrentIndex = useStore((s) => s.searchCurrentIndex);
+  const setSearchResults = useStore((s) => s.setSearchResults);
+  const setSearchCurrentIndex = useStore((s) => s.setSearchCurrentIndex);
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -243,6 +248,53 @@ export function PdfViewer({ bookId }) {
   }, []);
 
   useAutoScroll(containerRef, { isTxt: false });
+
+  useEffect(() => {
+    const pdf = pdfDocRef.current;
+    if (!pdf || !searchQuery || searchQuery.length < 2) {
+      setSearchResults([]);
+      setSearchCurrentIndex(-1);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function doSearch() {
+      const matches = [];
+      const lowerQ = searchQuery.toLowerCase();
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        if (cancelled) return;
+        try {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          for (const item of textContent.items) {
+            const str = item.str;
+            if (!str) continue;
+            let idx = str.toLowerCase().indexOf(lowerQ);
+            while (idx !== -1) {
+              matches.push({ page: pageNum, text: str, index: idx, match: str.substring(idx, idx + searchQuery.length) });
+              idx = str.toLowerCase().indexOf(lowerQ, idx + 1);
+            }
+          }
+        } catch {}
+      }
+
+      if (!cancelled) {
+        setSearchResults(matches);
+        setSearchCurrentIndex(matches.length > 0 ? 0 : -1);
+      }
+    }
+
+    doSearch();
+    return () => { cancelled = true; };
+  }, [searchQuery, pdfLoadedAt]);
+
+  useEffect(() => {
+    if (searchResults.length > 0 && searchCurrentIndex >= 0 && searchResults[searchCurrentIndex]?.page && searchResults[searchCurrentIndex].page !== currentPage) {
+      setCurrentPage(searchResults[searchCurrentIndex].page);
+    }
+  }, [searchCurrentIndex, searchResults, currentPage, setCurrentPage]);
 
   useEffect(() => {
     if (!pdfLoadedAt || pageAnimation === "none") return;

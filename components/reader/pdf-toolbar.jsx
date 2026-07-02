@@ -28,7 +28,6 @@ export function PdfToolbar({ bookId }) {
   );
   const updateBook = useStore((s) => s.updateBook);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [pageInput, setPageInput] = useState("");
   const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed, blueLightFilter, setBlueLightFilter, readingRuler, setReadingRuler, readingRulerStyle, setReadingRulerStyle } = useStore(
     useShallow((s) => ({
@@ -50,6 +49,16 @@ export function PdfToolbar({ bookId }) {
   );
   const allBooks = useStore((s) => s.books);
   const fileCache = useStore((s) => s.fileCache);
+  const { searchQuery, searchResults, searchCurrentIndex, setSearchQuery, setSearchResults, setSearchCurrentIndex } = useStore(
+    useShallow((s) => ({
+      searchQuery: s.searchQuery,
+      searchResults: s.searchResults,
+      searchCurrentIndex: s.searchCurrentIndex,
+      setSearchQuery: s.setSearchQuery,
+      setSearchResults: s.setSearchResults,
+      setSearchCurrentIndex: s.setSearchCurrentIndex,
+    }))
+  );
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
   const textContent = useMemo(() => {
     if (book?.format === "txt") return fileCache[bookId] || "";
@@ -306,7 +315,7 @@ export function PdfToolbar({ bookId }) {
       </div>
 
       {searchOpen && (
-        <div className="border-t px-3 py-2">
+        <div className="border-t px-3 py-2 flex items-center gap-2">
           <Input
             placeholder="Search in document..."
             className="max-w-sm"
@@ -314,6 +323,37 @@ export function PdfToolbar({ bookId }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus
           />
+          {searchQuery && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+              <span>{searchResults.length > 0 ? `${searchCurrentIndex + 1}/${searchResults.length}` : "0 results"}</span>
+              <button
+                className="hover:text-foreground disabled:opacity-30"
+                disabled={searchResults.length === 0}
+                onClick={() => {
+                  const prev = (searchCurrentIndex - 1 + searchResults.length) % searchResults.length;
+                  setSearchCurrentIndex(prev);
+                }}
+              >
+                ↑
+              </button>
+              <button
+                className="hover:text-foreground disabled:opacity-30"
+                disabled={searchResults.length === 0}
+                onClick={() => {
+                  const next = (searchCurrentIndex + 1) % searchResults.length;
+                  setSearchCurrentIndex(next);
+                }}
+              >
+                ↓
+              </button>
+              <button
+                className="hover:text-foreground ml-1"
+                onClick={() => { setSearchQuery(""); setSearchResults([]); setSearchCurrentIndex(-1); }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       )}
 
