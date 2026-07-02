@@ -16,7 +16,7 @@ export default function ReaderPage() {
 
   useEffect(() => {
     const handler = (e) => {
-      const { currentPage, totalPages, setCurrentPage, setZoom, zoom } = useStore.getState();
+      const { currentPage, totalPages, setCurrentPage, setZoom, zoom, readingRuler, setReadingRuler, autoScrollMode, setAutoScrollMode } = useStore.getState();
 
       if (e.key === "ArrowLeft" && currentPage > 1) {
         e.preventDefault();
@@ -24,6 +24,31 @@ export default function ReaderPage() {
       } else if (e.key === "ArrowRight" && currentPage < totalPages) {
         e.preventDefault();
         setCurrentPage(currentPage + 1);
+      } else if (e.key === "ArrowUp" && currentPage > 1) {
+        e.preventDefault();
+        setCurrentPage(currentPage - 1);
+      } else if (e.key === "ArrowDown" && currentPage < totalPages) {
+        e.preventDefault();
+        setCurrentPage(currentPage + 1);
+      } else if (e.key === "PageUp" && currentPage > 1) {
+        e.preventDefault();
+        setCurrentPage(Math.max(1, currentPage - 1));
+      } else if (e.key === "PageDown" && currentPage < totalPages) {
+        e.preventDefault();
+        setCurrentPage(Math.min(totalPages, currentPage + 1));
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setCurrentPage(1);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setCurrentPage(totalPages);
+      } else if (e.key === " " || e.key === "Space") {
+        e.preventDefault();
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+      } else if (e.key === "r" || e.key === "R") {
+        setReadingRuler(!readingRuler);
+      } else if (e.key === "a" || e.key === "A") {
+        setAutoScrollMode(autoScrollMode === "off" ? "rolling" : "off");
       } else if ((e.ctrlKey || e.metaKey) && e.key === "=") {
         e.preventDefault();
         setZoom(zoom + 10);

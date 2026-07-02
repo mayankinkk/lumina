@@ -44,6 +44,8 @@ export function PdfViewer({ bookId }) {
   const [selectedText, setSelectedText] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
   const [pageAnimClass, setPageAnimClass] = useState("");
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   // Load PDF into memory
   useEffect(() => {
@@ -190,6 +192,47 @@ export function PdfViewer({ bookId }) {
     }
   }, []);
 
+  const handleClickZone = useCallback((e) => {
+    if (selectedText) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const third = rect.width / 3;
+    if (x < third && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (x > rect.width - third && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  }, [currentPage, totalPages, setCurrentPage, selectedText]);
+
+  const handleTouchStart = useCallback((e) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (selectedText) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX.current;
+    const dy = touch.clientY - touchStartY.current;
+    if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0 && currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      } else if (dx > 0 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const third = rect.width / 3;
+      if (x < third && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      } else if (x > rect.width - third && currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    }
+  }, [currentPage, totalPages, setCurrentPage, selectedText]);
+
   const dismissContextMenu = useCallback(() => {
     setContextMenu(null);
     setSelectedText("");
@@ -244,7 +287,9 @@ export function PdfViewer({ bookId }) {
       ref={containerRef}
       className="relative flex-1 overflow-auto"
       onMouseUp={handleTextSelection}
-      onClick={dismissContextMenu}
+      onClick={(e) => { dismissContextMenu(); handleClickZone(e); }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {loading && (
         <div className="flex items-center justify-center h-[60vh]">
