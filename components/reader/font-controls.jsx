@@ -5,7 +5,8 @@ import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Type } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Type, AlignLeft, Hyphen } from "lucide-react";
 import { useState } from "react";
 
 const fonts = [
@@ -16,18 +17,22 @@ const fonts = [
 ];
 
 export function FontControls() {
-  const { readerFontFamily, readerFontSize, readerLineHeight, readerLetterSpacing, readerFontWeight, setReaderFontFamily, setReaderFontSize, setReaderLineHeight, setReaderLetterSpacing, setReaderFontWeight } = useStore(
+  const { readerFontFamily, readerFontSize, readerLineHeight, readerLetterSpacing, readerFontWeight, readerHyphenation, readerJustify, setReaderFontFamily, setReaderFontSize, setReaderLineHeight, setReaderLetterSpacing, setReaderFontWeight, setReaderHyphenation, setReaderJustify } = useStore(
     useShallow((s) => ({
       readerFontFamily: s.readerFontFamily,
       readerFontSize: s.readerFontSize,
       readerLineHeight: s.readerLineHeight,
       readerLetterSpacing: s.readerLetterSpacing,
       readerFontWeight: s.readerFontWeight,
+      readerHyphenation: s.readerHyphenation,
+      readerJustify: s.readerJustify,
       setReaderFontFamily: s.setReaderFontFamily,
       setReaderFontSize: s.setReaderFontSize,
       setReaderLineHeight: s.setReaderLineHeight,
       setReaderLetterSpacing: s.setReaderLetterSpacing,
       setReaderFontWeight: s.setReaderFontWeight,
+      setReaderHyphenation: s.setReaderHyphenation,
+      setReaderJustify: s.setReaderJustify,
     }))
   );
   const [open, setOpen] = useState(false);
@@ -95,6 +100,15 @@ export function FontControls() {
                 <span className="text-[10px] text-muted-foreground">{readerFontWeight}</span>
               </div>
               <Slider min={300} max={700} step={100} value={[readerFontWeight]} onValueChange={([v]) => setReaderFontWeight(v)} />
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <Label className="text-[10px] text-muted-foreground flex items-center gap-1"><AlignLeft className="h-3 w-3" /> Justify</Label>
+              <Switch checked={readerJustify} onCheckedChange={setReaderJustify} />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] text-muted-foreground flex items-center gap-1"><Hyphen className="h-3 w-3" /> Hyphenation</Label>
+              <Switch checked={readerHyphenation} onCheckedChange={setReaderHyphenation} />
             </div>
           </div>
         </div>

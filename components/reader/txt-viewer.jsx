@@ -12,6 +12,8 @@ export function TxtViewer({ bookId, book, zoom }) {
   const containerRef = useRef(null);
   const readerTheme = useStore((s) => s.readerTheme);
   const readerBackground = useStore((s) => s.readerBackground);
+  const readerHyphenation = useStore((s) => s.readerHyphenation);
+  const readerJustify = useStore((s) => s.readerJustify);
   const fontSettings = useStore(useShallow((s) => ({
     readerFontFamily: s.readerFontFamily,
     readerFontSize: s.readerFontSize,
@@ -50,6 +52,9 @@ export function TxtViewer({ bookId, book, zoom }) {
             lineHeight: fontSettings.readerLineHeight,
             letterSpacing: `${fontSettings.readerLetterSpacing}px`,
             fontWeight: fontSettings.readerFontWeight,
+            textAlign: readerJustify ? "justify" : "left",
+            WebkitHyphens: readerHyphenation ? "auto" : "none",
+            hyphens: readerHyphenation ? "auto" : "none",
           }}
         >
           {textContent}
