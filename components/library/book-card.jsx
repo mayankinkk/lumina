@@ -12,10 +12,13 @@ import { Clock, CheckCircle2, BookOpen, Trash2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
+import { TagInput } from "./tag-input";
 
 export function BookCard({ book }) {
   const removeBook = useStore((s) => s.removeBook);
   const updateBook = useStore((s) => s.updateBook);
+  const addTagToBook = useStore((s) => s.addTagToBook);
+  const removeTagFromBook = useStore((s) => s.removeTagFromBook);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(book.title);
@@ -80,6 +83,16 @@ export function BookCard({ book }) {
                   {book.totalPages > 0 ? `${book.totalPages} pages` : "Ready to read"}
                 </p>
               )}
+              {(book.tags?.length > 0) && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {book.tags.slice(0, 3).map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-[9px] px-1 py-0">{tag}</Badge>
+                  ))}
+                  {book.tags.length > 3 && (
+                    <Badge variant="outline" className="text-[9px] px-1 py-0">+{book.tags.length - 3}</Badge>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </Link>
@@ -104,6 +117,14 @@ export function BookCard({ book }) {
             <div>
               <label className="text-sm font-medium" htmlFor="ec-author">Author</label>
               <Input id="ec-author" value={editAuthor} onChange={(e) => setEditAuthor(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Tags</label>
+              <TagInput
+                tags={book.tags || []}
+                onAdd={(tag) => addTagToBook(book.id, tag)}
+                onRemove={(tag) => removeTagFromBook(book.id, tag)}
+              />
             </div>
           </div>
           <DialogFooter>

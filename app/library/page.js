@@ -22,7 +22,10 @@ export default function LibraryPage() {
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [activeTag, setActiveTag] = useState("");
   const books = useStore((s) => s.books);
+  const getAllTags = useStore((s) => s.getAllTags);
+  const allTags = useMemo(() => getAllTags(), [books, getAllTags]);
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => {
@@ -31,9 +34,10 @@ export default function LibraryPage() {
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.author.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFilter = activeFilter === "all" || book.status === activeFilter;
-      return matchesSearch && matchesFilter;
+      const matchesTag = !activeTag || (book.tags || []).includes(activeTag);
+      return matchesSearch && matchesFilter && matchesTag;
     });
-  }, [books, searchQuery, activeFilter]);
+  }, [books, searchQuery, activeFilter, activeTag]);
 
   return (
     <ShellLayout>
@@ -96,6 +100,30 @@ export default function LibraryPage() {
                 </Button>
               ))}
             </div>
+
+            {allTags.length > 0 && (
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                <Button
+                  variant={!activeTag ? "default" : "outline"}
+                  size="sm"
+                  className="shrink-0 text-xs"
+                  onClick={() => setActiveTag("")}
+                >
+                  All Tags
+                </Button>
+                {allTags.map((tag) => (
+                  <Button
+                    key={tag}
+                    variant={activeTag === tag ? "default" : "outline"}
+                    size="sm"
+                    className="shrink-0 text-xs"
+                    onClick={() => setActiveTag(activeTag === tag ? "" : tag)}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+              </div>
+            )}
 
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
