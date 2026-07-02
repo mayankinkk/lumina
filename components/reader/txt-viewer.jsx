@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 
 export function TxtViewer({ bookId, book, zoom }) {
@@ -9,6 +10,13 @@ export function TxtViewer({ bookId, book, zoom }) {
   const updateBook = useStore((s) => s.updateBook);
   const textContent = fileCache[bookId];
   const containerRef = useRef(null);
+  const fontSettings = useStore(useShallow((s) => ({
+    readerFontFamily: s.readerFontFamily,
+    readerFontSize: s.readerFontSize,
+    readerLineHeight: s.readerLineHeight,
+    readerLetterSpacing: s.readerLetterSpacing,
+    readerFontWeight: s.readerFontWeight,
+  })));
 
   useAutoScroll(containerRef, { isTxt: true });
 
@@ -33,8 +41,14 @@ export function TxtViewer({ bookId, book, zoom }) {
     <div ref={containerRef} className="flex-1 overflow-auto">
       <div className="flex justify-center py-8 px-4">
         <div
-          className="reading-well font-literata text-foreground whitespace-pre-wrap leading-relaxed"
-          style={{ fontSize: `${(zoom / 100) * 18}px` }}
+          className="reading-well text-foreground whitespace-pre-wrap"
+          style={{
+            fontFamily: fontSettings.readerFontFamily === "literata" ? "var(--font-literata), serif" : fontSettings.readerFontFamily === "sans" ? "var(--font-jakarta), sans-serif" : fontSettings.readerFontFamily === "serif" ? "Georgia, serif" : "ui-monospace, monospace",
+            fontSize: `${(zoom / 100) * fontSettings.readerFontSize}px`,
+            lineHeight: fontSettings.readerLineHeight,
+            letterSpacing: `${fontSettings.readerLetterSpacing}px`,
+            fontWeight: fontSettings.readerFontWeight,
+          }}
         >
           {textContent}
         </div>

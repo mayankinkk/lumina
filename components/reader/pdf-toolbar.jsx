@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import useStore from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { TtsControls } from "./tts-controls";
+import { FontControls } from "./font-controls";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
@@ -148,6 +149,7 @@ export function PdfToolbar({ bookId }) {
           >
             <Ruler className="h-4 w-4" />
           </Button>
+          <FontControls />
           <div className="relative">
             <Button
               variant={pageAnimation !== "none" ? "secondary" : "ghost"}
