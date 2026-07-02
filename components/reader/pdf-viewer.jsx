@@ -55,14 +55,21 @@ export function PdfViewer({ bookId }) {
       try {
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-        const pdf = await pdfjsLib.getDocument({ data: fileData }).promise;
+        let data = fileData;
+        if (data instanceof ArrayBuffer) {
+          data = new Uint8Array(data);
+        } else if (!(data instanceof Uint8Array)) {
+          data = new Uint8Array(data);
+        }
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
         if (cancelled) return;
         pdfDocRef.current = pdf;
         setTotalPages(pdf.numPages);
         setLoading(false);
         setCurrentPage(book.currentPage > 0 ? book.currentPage : 1);
       } catch (err) {
-        if (!cancelled) { setError("Failed to load PDF file."); setLoading(false); }
+        console.error("PDF load error:", err, "fileData type:", typeof fileData, "constructor:", fileData?.constructor?.name);
+        if (!cancelled) { setError(`Failed to load PDF file: ${err?.message || "unknown error"}`); setLoading(false); }
       }
     }
 
