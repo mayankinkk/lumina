@@ -9,6 +9,7 @@ import { PdfToolbar } from "./pdf-toolbar";
 import { TxtViewer } from "./txt-viewer";
 import { ContextMenuPopup } from "./context-menu";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
+import { ReadingRuler } from "./reading-ruler";
 
 export function PdfViewer({ bookId }) {
   const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook, hydrated } = useStore(
@@ -282,6 +283,8 @@ export function PdfViewer({ bookId }) {
           <ContextMenuPopup text={selectedText} bookId={bookId} />
         </div>
       )}
+
+      <ReadingRuler containerRef={containerRef} />
 
       {blueLightFilter > 0 && (
         <div

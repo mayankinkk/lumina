@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ export function PdfToolbar({ bookId }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageInput, setPageInput] = useState("");
-  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed, blueLightFilter, setBlueLightFilter } = useStore(
+  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed, blueLightFilter, setBlueLightFilter, readingRuler, setReadingRuler, readingRulerStyle, setReadingRulerStyle } = useStore(
     useShallow((s) => ({
       autoScrollMode: s.autoScrollMode,
       autoScrollSpeed: s.autoScrollSpeed,
@@ -40,6 +40,10 @@ export function PdfToolbar({ bookId }) {
       setPageAnimationSpeed: s.setPageAnimationSpeed,
       blueLightFilter: s.blueLightFilter,
       setBlueLightFilter: s.setBlueLightFilter,
+      readingRuler: s.readingRuler,
+      setReadingRuler: s.setReadingRuler,
+      readingRulerStyle: s.readingRulerStyle,
+      setReadingRulerStyle: s.setReadingRulerStyle,
     }))
   );
   const allBooks = useStore((s) => s.books);
@@ -135,6 +139,15 @@ export function PdfToolbar({ bookId }) {
             </Button>
           )}
           <TtsControls content={textContent} />
+          <Button
+            variant={readingRuler ? "default" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setReadingRuler(!readingRuler)}
+            aria-label="Reading ruler"
+          >
+            <Ruler className="h-4 w-4" />
+          </Button>
           <div className="relative">
             <Button
               variant={pageAnimation !== "none" ? "secondary" : "ghost"}
