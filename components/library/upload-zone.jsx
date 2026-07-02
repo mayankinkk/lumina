@@ -24,8 +24,8 @@ export function UploadZone() {
     async (file) => {
       const ext = file.name.split(".").pop().toLowerCase();
 
-      if (!["pdf", "txt", "epub"].includes(ext)) {
-        toast("Unsupported file format. Please upload PDF, EPUB, or TXT files.", "warning");
+      if (!["pdf", "txt", "epub", "cbz", "cbr"].includes(ext)) {
+        toast("Unsupported file format. Please upload PDF, EPUB, CBZ, CBR, or TXT files.", "warning");
         return;
       }
 
@@ -65,6 +65,31 @@ export function UploadZone() {
           fileData: arrayBuffer,
         };
 
+        addBook(book);
+        return book;
+      }
+
+      if (ext === "cbz" || ext === "cbr") {
+        if (ext === "cbr") {
+          toast("CBR format is not yet supported. Please convert to CBZ.", "warning");
+          return;
+        }
+        const arrayBuffer = await file.arrayBuffer();
+        const book = {
+          id: crypto.randomUUID(),
+          title: file.name.replace(/\.cbz$/i, ""),
+          author: "Unknown Author",
+          format: "cbz",
+          status: "reading",
+          totalPages: 0,
+          currentPage: 0,
+          progress: 0,
+          lastOpened: new Date().toISOString(),
+          dateAdded: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          fileData: arrayBuffer,
+        };
         addBook(book);
         return book;
       }
@@ -175,12 +200,12 @@ export function UploadZone() {
         <p className="mt-3 text-sm font-medium">
           {uploading ? "Processing files..." : "Drop files here or click to upload"}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">Supports PDF, EPUB, and TXT files up to 100MB</p>
+        <p className="mt-1 text-xs text-muted-foreground">Supports PDF, EPUB, CBZ, and TXT files up to 100MB</p>
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.txt,.epub"
+          accept=".pdf,.txt,.epub,.cbz,.cbr"
           multiple
           onChange={handleFileUpload}
         />

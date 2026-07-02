@@ -8,6 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { PdfToolbar } from "./pdf-toolbar";
 import { TxtViewer } from "./txt-viewer";
 import { EpubViewer } from "./epub-viewer";
+import { ComicViewer } from "./comic-viewer";
 import { ContextMenuPopup } from "./context-menu";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { ReadingRuler } from "./reading-ruler";
@@ -287,6 +288,10 @@ export function PdfViewer({ bookId }) {
 
   if (book.format === "epub") {
     return <EpubViewer bookId={bookId} book={book} />;
+  }
+
+  if (book.format === "cbz") {
+    return <ComicViewer bookId={bookId} book={book} />;
   }
 
   return (
