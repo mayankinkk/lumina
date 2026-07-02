@@ -27,6 +27,7 @@ export function PdfViewer({ bookId }) {
 
   const pageAnimation = useStore((s) => s.pageAnimation);
   const pageAnimationSpeed = useStore((s) => s.pageAnimationSpeed);
+  const blueLightFilter = useStore((s) => s.blueLightFilter);
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -280,6 +281,16 @@ export function PdfViewer({ bookId }) {
         >
           <ContextMenuPopup text={selectedText} bookId={bookId} />
         </div>
+      )}
+
+      {blueLightFilter > 0 && (
+        <div
+          className="pointer-events-none fixed inset-0 z-40"
+          style={{
+            backgroundColor: `rgba(255, 160, 60, ${blueLightFilter / 100})`,
+            mixBlendMode: "multiply",
+          }}
+        />
       )}
     </div>
   );

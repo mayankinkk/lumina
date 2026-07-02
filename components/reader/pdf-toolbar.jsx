@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ export function PdfToolbar({ bookId }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageInput, setPageInput] = useState("");
-  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed } = useStore(
+  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed, blueLightFilter, setBlueLightFilter } = useStore(
     useShallow((s) => ({
       autoScrollMode: s.autoScrollMode,
       autoScrollSpeed: s.autoScrollSpeed,
@@ -38,6 +38,8 @@ export function PdfToolbar({ bookId }) {
       pageAnimationSpeed: s.pageAnimationSpeed,
       setPageAnimation: s.setPageAnimation,
       setPageAnimationSpeed: s.setPageAnimationSpeed,
+      blueLightFilter: s.blueLightFilter,
+      setBlueLightFilter: s.setBlueLightFilter,
     }))
   );
   const allBooks = useStore((s) => s.books);
@@ -49,6 +51,7 @@ export function PdfToolbar({ bookId }) {
   }, [book, fileCache, bookId]);
   const [autoScrollOpen, setAutoScrollOpen] = useState(false);
   const [pageAnimOpen, setPageAnimOpen] = useState(false);
+  const [blueLightOpen, setBlueLightOpen] = useState(false);
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -229,6 +232,35 @@ export function PdfToolbar({ bookId }) {
                       />
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <Button
+              variant={blueLightFilter > 0 ? "secondary" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setBlueLightOpen(!blueLightOpen)}
+              aria-label="Blue light filter"
+            >
+              <Sun className="h-4 w-4" />
+            </Button>
+            {blueLightOpen && (
+              <div className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Blue Light Filter</Label>
+                  <Slider
+                    min={0}
+                    max={95}
+                    step={5}
+                    value={[blueLightFilter]}
+                    onValueChange={([v]) => setBlueLightFilter(v)}
+                  />
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span>Off</span>
+                    <span>{blueLightFilter}%</span>
+                  </div>
                 </div>
               </div>
             )}
