@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PdfToolbar, PdfViewer } from "@/components/reader/pdf-viewer";
 import { useReadingTracker } from "@/hooks/use-reading-tracker";
+import { BreakReminderModal } from "@/components/reader/break-reminder";
 import useStore from "@/lib/store";
 
 export default function ReaderPage() {
@@ -54,6 +55,7 @@ export default function ReaderPage() {
     <div className="flex h-screen flex-col overflow-hidden">
       <PdfToolbar bookId={bookId} />
       <PdfViewer bookId={bookId} />
+      <BreakReminderModal />
     </div>
   );
 }

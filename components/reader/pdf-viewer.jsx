@@ -10,6 +10,7 @@ import { TxtViewer } from "./txt-viewer";
 import { ContextMenuPopup } from "./context-menu";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { ReadingRuler } from "./reading-ruler";
+import { BreakReminderModal } from "./break-reminder";
 
 export function PdfViewer({ bookId }) {
   const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook, hydrated } = useStore(
