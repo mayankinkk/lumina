@@ -31,6 +31,8 @@ export function PdfViewer({ bookId }) {
   const pageAnimation = useStore((s) => s.pageAnimation);
   const pageAnimationSpeed = useStore((s) => s.pageAnimationSpeed);
   const blueLightFilter = useStore((s) => s.blueLightFilter);
+  const readerTheme = useStore((s) => s.readerTheme);
+  const readerBackground = useStore((s) => s.readerBackground);
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -290,7 +292,7 @@ export function PdfViewer({ bookId }) {
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 overflow-auto"
+      className={`relative flex-1 overflow-auto ${readerTheme !== "default" ? `theme-${readerTheme}` : ""} ${readerBackground !== "default" ? `bg-${readerBackground}` : ""}`}
       onMouseUp={handleTextSelection}
       onClick={(e) => { dismissContextMenu(); handleClickZone(e); }}
       onTouchStart={handleTouchStart}

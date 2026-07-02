@@ -10,6 +10,8 @@ export function TxtViewer({ bookId, book, zoom }) {
   const updateBook = useStore((s) => s.updateBook);
   const textContent = fileCache[bookId];
   const containerRef = useRef(null);
+  const readerTheme = useStore((s) => s.readerTheme);
+  const readerBackground = useStore((s) => s.readerBackground);
   const fontSettings = useStore(useShallow((s) => ({
     readerFontFamily: s.readerFontFamily,
     readerFontSize: s.readerFontSize,
@@ -38,7 +40,7 @@ export function TxtViewer({ bookId, book, zoom }) {
   }
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-auto">
+    <div ref={containerRef} className={`flex-1 overflow-auto ${readerTheme !== "default" ? `theme-${readerTheme}` : ""} ${readerBackground !== "default" ? `bg-${readerBackground}` : ""}`}>
       <div className="flex justify-center py-8 px-4">
         <div
           className="reading-well text-foreground whitespace-pre-wrap"
