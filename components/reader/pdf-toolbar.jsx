@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import useStore from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 
@@ -25,8 +27,17 @@ export function PdfToolbar({ bookId }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageInput, setPageInput] = useState("");
+  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed } = useStore(
+    useShallow((s) => ({
+      autoScrollMode: s.autoScrollMode,
+      autoScrollSpeed: s.autoScrollSpeed,
+      setAutoScrollMode: s.setAutoScrollMode,
+      setAutoScrollSpeed: s.setAutoScrollSpeed,
+    }))
+  );
   const allBooks = useStore((s) => s.books);
   const book = useMemo(() => allBooks.find((b) => b.id === bookId), [allBooks, bookId]);
+  const [autoScrollOpen, setAutoScrollOpen] = useState(false);
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -72,6 +83,29 @@ export function PdfToolbar({ bookId }) {
               <span>of {totalPages || "—"}</span>
             </div>
           </div>
+          {/* Prev / Next page buttons */}
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              aria-label="Next page"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-1">
@@ -86,6 +120,58 @@ export function PdfToolbar({ bookId }) {
               <span className="hidden sm:inline">Finish</span>
             </Button>
           )}
+          <div className="relative">
+            <Button
+              variant={autoScrollMode !== "off" ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setAutoScrollOpen(!autoScrollOpen)}
+              aria-label="Auto-scroll"
+            >
+              {autoScrollMode !== "off" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+            {autoScrollOpen && (
+              <div className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
+                <div className="space-y-3">
+                  <Label className="text-xs font-medium">Auto-scroll</Label>
+                  <div className="flex gap-1">
+                    {[
+                      { value: "off", label: "Off" },
+                      { value: "rolling", label: "Rolling" },
+                      { value: "pixel", label: "Pixel" },
+                      { value: "line", label: "Line" },
+                      { value: "page", label: "Page" },
+                    ].map((m) => (
+                      <Button
+                        key={m.value}
+                        variant={autoScrollMode === m.value ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[10px] px-1.5"
+                        onClick={() => { setAutoScrollMode(m.value); if (m.value !== "off") setAutoScrollOpen(false); }}
+                      >
+                        {m.label}
+                      </Button>
+                    ))}
+                  </div>
+                  {autoScrollMode !== "off" && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[10px] text-muted-foreground">Speed</Label>
+                        <span className="text-[10px] text-muted-foreground">{autoScrollSpeed}</span>
+                      </div>
+                      <Slider
+                        min={1}
+                        max={10}
+                        step={1}
+                        value={[autoScrollSpeed]}
+                        onValueChange={([v]) => setAutoScrollSpeed(v)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <Button
             variant="ghost"
             size="icon"

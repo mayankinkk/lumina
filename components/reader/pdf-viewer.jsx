@@ -8,6 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { PdfToolbar } from "./pdf-toolbar";
 import { TxtViewer } from "./txt-viewer";
 import { ContextMenuPopup } from "./context-menu";
+import { useAutoScroll } from "@/hooks/use-auto-scroll";
 
 export function PdfViewer({ bookId }) {
   const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook, hydrated } = useStore(
@@ -27,108 +28,142 @@ export function PdfViewer({ bookId }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const pdfDocRef = useRef(null);
-  const renderingRef = useRef(false);
+  const renderTaskIdRef = useRef(0);
+  const activeRenderTaskRef = useRef(null); // holds the live pdfjs RenderTask for cancellation
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Timestamp bumped after PDF loads — guarantees render effect fires even if currentPage stays at 1
+  const [pdfLoadedAt, setPdfLoadedAt] = useState(null);
   const [selectedText, setSelectedText] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
 
+  // Load PDF into memory
   useEffect(() => {
     if (!book || !hydrated) return;
     let cancelled = false;
 
-    async function loadPdf() {
-      setLoading(true);
-      setError(null);
-      const fileData = loadFileData(bookId);
+    pdfDocRef.current = null;
+    setPdfLoadedAt(null);
+    setLoading(true);
+    setError(null);
 
+    async function loadPdf() {
       if (book.format === "txt") {
         if (!cancelled) { setTotalPages(1); setLoading(false); }
         return;
       }
 
+      const fileData = loadFileData(bookId);
       if (!fileData) {
-        if (!cancelled) { setError("File data not available. Please re-upload the file."); setLoading(false); }
+        if (!cancelled) {
+          setError("File data not available. Please re-upload the file.");
+          setLoading(false);
+        }
         return;
       }
 
       try {
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+        // Always produce an independent copy of the data before passing to pdfjs.
+        // pdfjs transfers the ArrayBuffer to its web worker (neutering the original),
+        // so we must never share the buffer reference from the fileCache.
         let bytes;
-        if (fileData instanceof ArrayBuffer) {
-          bytes = new Uint8Array(new ArrayBuffer(fileData.byteLength));
-          bytes.set(new Uint8Array(fileData));
-        } else if (fileData instanceof Uint8Array) {
-          bytes = new Uint8Array(new ArrayBuffer(fileData.byteLength));
-          bytes.set(fileData);
+        if (fileData instanceof Uint8Array) {
+          bytes = fileData.slice(0); // copies only the typed-array's own bytes
+        } else if (fileData instanceof ArrayBuffer) {
+          bytes = new Uint8Array(fileData.slice(0)); // .slice creates a new ArrayBuffer
         } else {
-          bytes = new Uint8Array(new ArrayBuffer(fileData.byteLength));
-          bytes.set(new Uint8Array(fileData));
+          bytes = new Uint8Array(fileData);
         }
+
         const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
         if (cancelled) return;
+
         pdfDocRef.current = pdf;
         setTotalPages(pdf.numPages);
+
+        // setCurrentPage may be a no-op if page is already 1 (store default).
+        // Always set it so the page is correct, then bump pdfLoadedAt to
+        // guarantee the render effect fires regardless.
+        const targetPage = book.currentPage > 0 ? book.currentPage : 1;
+        setCurrentPage(targetPage);
         setLoading(false);
-        setCurrentPage(book.currentPage > 0 ? book.currentPage : 1);
+        // Bump timestamp AFTER setLoading so render effect sees pdfDocRef populated
+        setPdfLoadedAt(Date.now());
       } catch (err) {
-        console.error("PDF load error:", err, "fileData type:", typeof fileData, "constructor:", fileData?.constructor?.name);
-        if (!cancelled) { setError(`Failed to load PDF file: ${err?.message || "unknown error"}`); setLoading(false); }
+        console.error("PDF load error:", err);
+        if (!cancelled) {
+          setError(`Failed to load PDF: ${err?.message || "unknown error"}`);
+          setLoading(false);
+        }
       }
     }
 
     loadPdf();
     return () => { cancelled = true; };
-  }, [bookId, book, hydrated, loadFileData, setTotalPages, setCurrentPage]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId, hydrated]);
 
+  // Render the current page onto the canvas
   useEffect(() => {
-    if (!pdfDocRef.current || loading || currentPage < 1) return;
-    let cancelled = false;
+    if (!pdfDocRef.current || !pdfLoadedAt || currentPage < 1) return;
+
+    // Cancel any in-flight pdfjs render before starting a new one
+    if (activeRenderTaskRef.current) {
+      try { activeRenderTaskRef.current.cancel(); } catch (_) {}
+      activeRenderTaskRef.current = null;
+    }
+
+    const taskId = ++renderTaskIdRef.current;
 
     async function renderPage() {
-      if (renderingRef.current) return;
-      renderingRef.current = true;
       try {
         const pdf = pdfDocRef.current;
-        if (!pdf || cancelled) {
-          renderingRef.current = false;
-          return;
-        }
+        if (!pdf) return;
+
         const page = await pdf.getPage(currentPage);
-        if (cancelled) {
-          renderingRef.current = false;
-          return;
-        }
+        if (taskId !== renderTaskIdRef.current) return;
+
         const scale = (zoom / 100) * 1.5;
         const viewport = page.getViewport({ scale });
         const canvas = canvasRef.current;
-        if (!canvas) {
-          renderingRef.current = false;
-          return;
-        }
+        if (!canvas) return;
+
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        if (!cancelled) {
-          const currentBook = useStore.getState().books.find((b) => b.id === bookId);
-          if (currentBook) {
-            updateBook(bookId, {
-              currentPage,
-              progress: currentBook.totalPages > 0 ? Math.round((currentPage / currentBook.totalPages) * 100) : 0,
-              lastOpened: new Date().toISOString(),
-            });
-          }
+
+        const renderTask = page.render({ canvasContext: ctx, viewport });
+        activeRenderTaskRef.current = renderTask;
+        await renderTask.promise;
+        activeRenderTaskRef.current = null;
+
+        if (taskId !== renderTaskIdRef.current) return;
+
+        const freshBook = useStore.getState().books.find((b) => b.id === bookId);
+        if (freshBook) {
+          updateBook(bookId, {
+            currentPage,
+            progress: freshBook.totalPages > 0
+              ? Math.round((currentPage / freshBook.totalPages) * 100)
+              : 0,
+            lastOpened: new Date().toISOString(),
+          });
         }
-      } catch {
-      } finally {
-        renderingRef.current = false;
+      } catch (err) {
+        // RenderingCancelledException is expected when we cancel — ignore it
+        if (err?.name !== "RenderingCancelledException") {
+          console.error("PDF render error:", err);
+        }
       }
     }
+
     renderPage();
-  }, [currentPage, zoom, loading, bookId, updateBook]);
+  }, [currentPage, zoom, pdfLoadedAt, bookId, updateBook]);
 
   const handleTextSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -152,6 +187,8 @@ export function PdfViewer({ bookId }) {
     setContextMenu(null);
     setSelectedText("");
   }, []);
+
+  useAutoScroll(containerRef, { isTxt: false });
 
   if (!book) {
     return (
@@ -195,16 +232,19 @@ export function PdfViewer({ bookId }) {
         </div>
       )}
 
-      {!loading && !error && (
-        <div className="flex justify-center py-4 px-2">
-          <canvas
-            ref={canvasRef}
-            className="max-w-full shadow-lg"
-            role="img"
-            aria-label={`Page ${currentPage} of ${book.totalPages}`}
-          />
-        </div>
-      )}
+      {/* Always keep canvas mounted so page turns don't cause a blank flash.
+          Use visibility (not display:none) to preserve canvas dimensions. */}
+      <div
+        className="flex justify-center py-4 px-2"
+        style={{ visibility: loading || error ? "hidden" : "visible" }}
+      >
+        <canvas
+          ref={canvasRef}
+          className="max-w-full shadow-lg"
+          role="img"
+          aria-label={`Page ${currentPage} of ${book.totalPages}`}
+        />
+      </div>
 
       {contextMenu && (
         <div
