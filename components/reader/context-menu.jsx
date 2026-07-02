@@ -11,6 +11,8 @@ const actions = [
   { label: "Translate", icon: "🌐", id: "translate" },
   { label: "Read", icon: "🔊", id: "read" },
   { label: "Highlight", icon: "🖍️", id: "highlight" },
+  { label: "Underline", icon: "📄", id: "underline" },
+  { label: "Strikethrough", icon: "✂️", id: "strikethrough" },
   { label: "Note", icon: "📝", id: "note" },
   { label: "Copy", icon: "📋", id: "copy" },
   { label: "Save", icon: "🔖", id: "save" },
@@ -48,11 +50,13 @@ export function ContextMenuPopup({ text, bookId }) {
       setActiveAction("define");
       setShowAiDrawer(true);
     }
-    if (actionId === "highlight") {
+    if (actionId === "highlight" || actionId === "underline" || actionId === "strikethrough") {
+      const typeMap = { highlight: "highlight", underline: "underline", strikethrough: "strikethrough" };
       addHighlight({
         id: crypto.randomUUID(),
         bookId,
         text,
+        type: typeMap[actionId] || "highlight",
         color: "#fde047",
         page: useStore.getState().currentPage,
         createdAt: new Date().toISOString(),
