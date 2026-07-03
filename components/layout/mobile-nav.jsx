@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, BookOpen, BookMarked, StickyNote, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { getDueWordsCount } from "@/lib/sm2";
+import useStore from "@/lib/store";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -15,6 +18,7 @@ const navItems = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const dueCount = useStore((s) => getDueWordsCount(s.vocabulary));
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
@@ -35,13 +39,20 @@ export function MobileNav() {
                   : "text-muted-foreground"
               )}
             >
-              <div
-                className={cn(
-                  "flex h-8 w-12 items-center justify-center rounded-full transition-colors",
-                  isActive && "bg-primary text-primary-foreground"
+              <div className="relative">
+                <div
+                  className={cn(
+                    "flex h-8 w-12 items-center justify-center rounded-full transition-colors",
+                    isActive && "bg-primary text-primary-foreground"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                </div>
+                {item.label === "Vocab" && dueCount > 0 && (
+                  <Badge variant="default" className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 text-[9px]">
+                    {dueCount}
+                  </Badge>
                 )}
-              >
-                <item.icon className="h-4 w-4" />
               </div>
               {item.label}
             </Link>

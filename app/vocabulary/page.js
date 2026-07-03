@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Play } from "lucide-react";
 import useStore from "@/lib/store";
 import { calculateNextReview, getDueWords } from "@/lib/sm2";
-import { FlashcardMode } from "@/components/vocabulary/flashcard-mode";
+import { FlashcardView } from "@/components/vocabulary/flashcard-view";
 import { WordDetail } from "@/components/vocabulary/word-detail";
 
 export default function VocabularyPage() {
@@ -19,7 +19,7 @@ export default function VocabularyPage() {
   const [selectedWord, setSelectedWord] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMastery, setFilterMastery] = useState("all");
-  const [flashcardMode, setFlashcardMode] = useState(false);
+  const [flashcardOpen, setFlashcardOpen] = useState(false);
 
   const filtered = useMemo(() => {
     return vocabulary.filter((w) => {
@@ -36,18 +36,6 @@ export default function VocabularyPage() {
     if (!word) return;
     updateVocabularyWord(wordId, calculateNextReview(word, quality));
   };
-
-  if (flashcardMode) {
-    return (
-      <ShellLayout>
-        <FlashcardMode
-          words={dueWords.length > 0 ? dueWords : filtered}
-          onReview={handleReview}
-          onExit={() => setFlashcardMode(false)}
-        />
-      </ShellLayout>
-    );
-  }
 
   return (
     <ShellLayout>
@@ -67,9 +55,9 @@ export default function VocabularyPage() {
                   <p className="text-sm font-medium">Your Collection</p>
                   <Badge variant="secondary">{vocabulary.length} words</Badge>
                 </div>
-                {dueWords.length > 0 && <p className="text-xs text-muted-foreground">{dueWords.length} due for review</p>}
-                <Button className="w-full" disabled={vocabulary.length === 0} onClick={() => setFlashcardMode(true)}>
-                  <Play className="h-4 w-4 mr-2" /> Practice {dueWords.length > 0 ? `(${dueWords.length} due)` : ""}
+                <p className="text-xs text-muted-foreground">{dueWords.length} word{dueWords.length !== 1 ? "s" : ""} due for review</p>
+                <Button className="w-full" disabled={dueWords.length === 0} onClick={() => setFlashcardOpen(true)}>
+                  <Play className="h-4 w-4 mr-2" /> Review Now ({dueWords.length})
                 </Button>
               </CardContent>
             </Card>
@@ -111,6 +99,12 @@ export default function VocabularyPage() {
           </div>
         </div>
       </div>
+
+      <FlashcardView
+        words={dueWords}
+        open={flashcardOpen}
+        onOpenChange={setFlashcardOpen}
+      />
     </ShellLayout>
   );
 }

@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Badge } from "@/components/ui/badge";
+import { getDueWordsCount } from "@/lib/sm2";
 import useStore from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 
@@ -22,6 +24,7 @@ export function Header() {
   const { toggleSidebar } = useStore(
     useShallow((s) => ({ toggleSidebar: s.toggleSidebar }))
   );
+  const dueCount = useStore((s) => getDueWordsCount(s.vocabulary));
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -61,6 +64,11 @@ export function Header() {
                 )}
               >
                 {item.label}
+                {item.label === "Vocabulary" && dueCount > 0 && (
+                  <Badge variant="default" className="ml-1.5 h-5 px-1 text-[10px]">
+                    {dueCount}
+                  </Badge>
+                )}
               </Link>
             );
           })}

@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import useStore from "@/lib/store";
-import { useShallow } from "zustand/react/shallow";
+import { Badge } from "@/components/ui/badge";
+import { getDueWordsCount } from "@/lib/sm2";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -26,9 +27,8 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { sidebarOpen, closeSidebar } = useStore(
-    useShallow((s) => ({ sidebarOpen: s.sidebarOpen, closeSidebar: s.closeSidebar }))
-  );
+  const { sidebarOpen, closeSidebar } = useStore((s) => ({ sidebarOpen: s.sidebarOpen, closeSidebar: s.closeSidebar }));
+  const dueCount = useStore((s) => getDueWordsCount(s.vocabulary));
 
   return (
     <>
@@ -83,6 +83,11 @@ export function Sidebar() {
                 >
                   <item.icon className="h-4 w-4" />
                   {item.label}
+                  {item.label === "Vocabulary" && dueCount > 0 && (
+                    <Badge variant="default" className="ml-auto h-5 min-w-[1.25rem] px-1 text-[10px]">
+                      {dueCount}
+                    </Badge>
+                  )}
                 </Link>
               );
             })}
