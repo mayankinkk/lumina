@@ -231,17 +231,54 @@ export function PdfViewer({ bookId }) {
 
   const handleClickZone = useCallback((e) => {
     if (selectedText) return;
-    const dual = useStore.getState().dualPageMode;
+    const state = useStore.getState();
+    const dual = state.dualPageMode;
     const step = dual ? 2 : 1;
+    const zones = state.tapZones;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const third = rect.width / 3;
-    if (x < third && currentPage > 1) {
-      setCurrentPage(Math.max(1, currentPage - step));
-    } else if (x > rect.width - third && currentPage < totalPages) {
-      setCurrentPage(Math.min(totalPages, currentPage + step));
+
+    let position;
+    if (x < third) {
+      position = "left";
+    } else if (x > rect.width - third) {
+      position = "right";
+    } else {
+      position = "center";
     }
-  }, [currentPage, totalPages, setCurrentPage, selectedText]);
+
+    const zone = zones.find((z) => z.position === position);
+    if (!zone || zone.action === "none") return;
+
+    switch (zone.action) {
+      case "prevPage":
+        if (currentPage > 1) setCurrentPage(Math.max(1, currentPage - step));
+        break;
+      case "nextPage":
+        if (currentPage < totalPages) setCurrentPage(Math.min(totalPages, currentPage + step));
+        break;
+      case "bookmark":
+        state.addBookmark({
+          id: crypto.randomUUID(),
+          bookId,
+          page: currentPage,
+          label: `Page ${currentPage}`,
+          createdAt: new Date().toISOString(),
+        });
+        break;
+      case "toc": {
+        const tocBtn = document.querySelector("[data-toc-toggle]");
+        tocBtn?.click();
+        break;
+      }
+      case "search": {
+        const searchInput = document.querySelector("[data-search-input]");
+        if (searchInput) setTimeout(() => searchInput.focus(), 50);
+        break;
+      }
+    }
+  }, [currentPage, totalPages, setCurrentPage, selectedText, bookId]);
 
   const handleTouchStart = useCallback((e) => {
     const touch = e.touches[0];

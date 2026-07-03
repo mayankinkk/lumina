@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useStore from "@/lib/store";
+import { TapZoneSettings, getActionLabel } from "@/components/settings/tap-zone-settings";
 import { useWebdav } from "@/hooks/use-webdav";
 import { useAppLock } from "@/hooks/use-app-lock";
 import { useNightModeScheduler, getSchedule } from "@/hooks/use-night-mode-scheduler";
@@ -37,6 +38,8 @@ export default function SettingsPage() {
   const [lockConfirm, setLockConfirm] = useState("");
   const [nightStart, setNightStart] = useState("20:00");
   const [nightEnd, setNightEnd] = useState("07:00");
+  const [tapZoneOpen, setTapZoneOpen] = useState(false);
+  const tapZones = useStore((s) => s.tapZones);
   const swipeThreshold = useStore((s) => s.swipeThreshold);
   const setSwipeThreshold = useStore((s) => s.setSwipeThreshold);
 
@@ -409,6 +412,34 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
+                  <span className="text-lg">📱</span> Tap Zones
+                </CardTitle>
+                <CardDescription>Configure tap actions for left, center, and right zones</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm space-y-1">
+                    {tapZones.length > 0 ? (
+                      tapZones.map((z) => (
+                        <div key={z.id} className="flex gap-2">
+                          <span className="font-medium capitalize min-w-[60px]">{z.position}:</span>
+                          <span className="text-muted-foreground">{getActionLabel(z.action)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground">Not configured</span>
+                    )}
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setTapZoneOpen(true)}>
+                    Configure
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
                   <Moon className="h-4 w-4" /> Night Mode Scheduler
                 </CardTitle>
                 <CardDescription>Automatically switch to dark theme and blue light filter at night</CardDescription>
@@ -622,6 +653,8 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <TapZoneSettings open={tapZoneOpen} onOpenChange={setTapZoneOpen} />
 
         <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
           <DialogContent>
