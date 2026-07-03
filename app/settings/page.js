@@ -28,6 +28,7 @@ export default function SettingsPage() {
   const vocabulary = useStore((s) => s.vocabulary);
   const notes = useStore((s) => s.notes);
   const highlights = useStore((s) => s.highlights);
+  const readingSessions = useStore((s) => s.readingSessions);
 
   const appLock = useAppLock();
   const nightMode = useNightModeScheduler();
@@ -175,6 +176,47 @@ export default function SettingsPage() {
     };
     reader.readAsText(file);
     e.target.value = "";
+  };
+
+  const handleExportStats = () => {
+    const totalSessions = readingSessions.length;
+    const totalPages = readingSessions.reduce((s, r) => s + (r.pagesRead || 0), 0);
+    const totalMinutes = readingSessions.reduce((s, r) => s + (r.duration || 0), 0);
+    const streak = (() => {
+      let count = 0;
+      const d = new Date();
+      while (true) {
+        const key = d.toISOString().slice(0, 10);
+        const hit = readingSessions.some((r) => r.date?.startsWith(key));
+        if (!hit) break;
+        count++;
+        d.setDate(d.getDate() - 1);
+      }
+      return count;
+    })();
+
+    const stats = {
+      exportedAt: new Date().toISOString(),
+      totalSessions,
+      totalPagesRead: totalPages,
+      totalReadingMinutes: totalMinutes,
+      averageMinutesPerSession: totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0,
+      currentStreakDays: streak,
+      sessions: readingSessions.map((r) => ({
+        date: r.date,
+        durationMinutes: r.duration,
+        pagesRead: r.pagesRead,
+        bookId: r.bookId,
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(stats, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lumina-reading-stats-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -433,6 +475,18 @@ export default function SettingsPage() {
                     </Button>
                     <input type="file" accept=".json" className="hidden" onChange={handleImport} />
                   </label>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Export Reading Stats</p>
+                    <p className="text-xs text-muted-foreground">
+                      Download your reading statistics as JSON
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleExportStats}>
+                    <Download className="h-4 w-4 mr-2" /> Stats
+                  </Button>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
