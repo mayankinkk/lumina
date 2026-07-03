@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Grid3X3, List, Search, BookOpen } from "lucide-react";
 import useStore from "@/lib/store";
+import { OpdsBrowser } from "@/components/library/opds-browser";
 
 const statusFilters = [
   { label: "All", value: "all" },
@@ -84,6 +85,7 @@ export default function LibraryPage() {
                     <List className="h-4 w-4" />
                   </Button>
                 </div>
+                <OpdsBrowser />
               </div>
             </div>
 
@@ -163,7 +165,7 @@ export default function LibraryPage() {
 
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <span>Supported formats:</span>
-          {["PDF", "EPUB", "CBZ", "TXT"].map((fmt) => (
+          {["PDF", "EPUB", "CBZ", "TXT", "OPDS"].map((fmt) => (
             <Badge key={fmt} variant="secondary" className="text-[10px]">
               {fmt}
             </Badge>
