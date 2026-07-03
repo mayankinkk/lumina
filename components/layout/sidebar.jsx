@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { Badge } from "@/components/ui/badge";
 import { getDueWordsCount } from "@/lib/sm2";
 
@@ -27,7 +28,9 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { sidebarOpen, closeSidebar } = useStore((s) => ({ sidebarOpen: s.sidebarOpen, closeSidebar: s.closeSidebar }));
+  const { sidebarOpen, closeSidebar } = useStore(
+    useShallow((s) => ({ sidebarOpen: s.sidebarOpen, closeSidebar: s.closeSidebar }))
+  );
   const dueCount = useStore((s) => getDueWordsCount(s.vocabulary));
 
   return (
