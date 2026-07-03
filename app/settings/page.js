@@ -5,10 +5,11 @@ import ShellLayout from "@/components/layout/shell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload } from "lucide-react";
+import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useStore from "@/lib/store";
+import { useWebdav } from "@/hooks/use-webdav";
 
 export default function SettingsPage() {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
@@ -37,6 +39,71 @@ export default function SettingsPage() {
       try { await import("idb-keyval").then((m) => m.del(`lumina_file_${id}`)); } catch {}
     }
     window.location.reload();
+  };
+
+  const {
+    config: webdavConfig,
+    setConfig: setWebdavConfig,
+    clearConfig: clearWebdavConfig,
+    syncing,
+    lastSync,
+    backupToWebdav,
+    restoreFromWebdav,
+    listBackups,
+    isConfigured,
+  } = useWebdav();
+  const [webdavUrl, setWebdavUrl] = useState(webdavConfig.url);
+  const [webdavUser, setWebdavUser] = useState(webdavConfig.username);
+  const [webdavPass, setWebdavPass] = useState(webdavConfig.password);
+  const [syncStatus, setSyncStatus] = useState("");
+
+  const handleWebdavSave = () => {
+    setWebdavConfig({ url: webdavUrl, username: webdavUser, password: webdavPass });
+    setSyncStatus("WebDAV configuration saved");
+  };
+
+  const handleBackup = async () => {
+    try {
+      setSyncStatus("Backing up...");
+      await backupToWebdav();
+      setSyncStatus("Backup uploaded successfully!");
+    } catch (err) {
+      setSyncStatus(`Backup failed: ${err.message}`);
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      setSyncStatus("Fetching backup list...");
+      const backups = await listBackups();
+      if (backups.length === 0) {
+        setSyncStatus("No backups found");
+        return;
+      }
+      const latest = backups[backups.length - 1];
+      setSyncStatus(`Restoring from ${latest.displayName}...`);
+      const data = await restoreFromWebdav(latest.displayName);
+      if (data.books) {
+        const store = useStore.getState();
+        data.books.forEach((b) => store.addBook(b));
+      }
+      if (data.vocabulary) {
+        const store = useStore.getState();
+        data.vocabulary.forEach((w) => store.addVocabularyWord(w));
+      }
+      if (data.notes) {
+        const store = useStore.getState();
+        data.notes.forEach((n) => store.addNote(n));
+      }
+      if (data.highlights) {
+        const store = useStore.getState();
+        data.highlights.forEach((h) => store.addHighlight(h));
+      }
+      setSyncStatus(`Restored from ${latest.displayName}`);
+      window.location.reload();
+    } catch (err) {
+      setSyncStatus(`Restore failed: ${err.message}`);
+    }
   };
 
   const handleExport = () => {
@@ -105,6 +172,7 @@ export default function SettingsPage() {
           <TabsList className="w-full justify-start h-auto p-1">
             <TabsTrigger value="general" aria-label="General settings">General</TabsTrigger>
             <TabsTrigger value="appearance" aria-label="Appearance settings">Appearance</TabsTrigger>
+            <TabsTrigger value="sync" aria-label="Cloud sync">Sync</TabsTrigger>
             <TabsTrigger value="data" aria-label="Data management">Data</TabsTrigger>
             <TabsTrigger value="about" aria-label="About Lumina">About</TabsTrigger>
           </TabsList>
@@ -175,6 +243,59 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <ThemeToggle />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="sync" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Cloud className="h-4 w-4" /> Cloud Sync
+                </CardTitle>
+                <CardDescription>Sync your data to a WebDAV server</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium" htmlFor="webdav-url">WebDAV URL</label>
+                    <Input id="webdav-url" placeholder="https://example.com/remote.php/dav/files/user/" value={webdavUrl} onChange={(e) => setWebdavUrl(e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium" htmlFor="webdav-user">Username</label>
+                      <Input id="webdav-user" value={webdavUser} onChange={(e) => setWebdavUser(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium" htmlFor="webdav-pass">Password</label>
+                      <Input id="webdav-pass" type="password" value={webdavPass} onChange={(e) => setWebdavPass(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleWebdavSave} disabled={!webdavUrl}>
+                      <RefreshCw className="h-4 w-4 mr-2" /> Save Config
+                    </Button>
+                    {isConfigured && (
+                      <Button variant="outline" onClick={clearWebdavConfig}>
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <Separator />
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Backup & Restore</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={handleBackup} disabled={!isConfigured || syncing}>
+                      <Upload className="h-4 w-4 mr-2" /> {syncing ? "Syncing..." : "Backup"}
+                    </Button>
+                    <Button variant="outline" onClick={handleRestore} disabled={!isConfigured || syncing}>
+                      <Download className="h-4 w-4 mr-2" /> Restore
+                    </Button>
+                  </div>
+                  {syncStatus && <p className="text-xs text-muted-foreground">{syncStatus}</p>}
+                  {lastSync && <p className="text-xs text-muted-foreground">Last sync: {new Date(lastSync).toLocaleString()}</p>}
                 </div>
               </CardContent>
             </Card>
