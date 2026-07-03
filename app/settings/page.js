@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock } from "lucide-react";
+import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock, Moon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import {
 import useStore from "@/lib/store";
 import { useWebdav } from "@/hooks/use-webdav";
 import { useAppLock } from "@/hooks/use-app-lock";
+import { useNightModeScheduler, getSchedule } from "@/hooks/use-night-mode-scheduler";
 
 export default function SettingsPage() {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
@@ -29,8 +30,11 @@ export default function SettingsPage() {
   const highlights = useStore((s) => s.highlights);
 
   const appLock = useAppLock();
+  const nightMode = useNightModeScheduler();
   const [lockPassword, setLockPassword] = useState("");
   const [lockConfirm, setLockConfirm] = useState("");
+  const [nightStart, setNightStart] = useState("20:00");
+  const [nightEnd, setNightEnd] = useState("07:00");
 
   const handleLockEnable = () => {
     if (lockPassword.length >= 4 && lockPassword === lockConfirm) {
@@ -302,6 +306,41 @@ export default function SettingsPage() {
                   </div>
                   <ThemeToggle />
                 </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Moon className="h-4 w-4" /> Night Mode Scheduler
+                </CardTitle>
+                <CardDescription>Automatically switch to dark theme and blue light filter at night</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Enable scheduler</p>
+                  <Switch
+                    checked={nightMode.isActive}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        nightMode.set(nightStart, nightEnd);
+                      } else {
+                        nightMode.disable();
+                      }
+                    }}
+                  />
+                </div>
+                {nightMode.isActive && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium" htmlFor="night-start">Start time</label>
+                      <Input id="night-start" type="time" value={nightStart} onChange={(e) => { setNightStart(e.target.value); nightMode.set(e.target.value, nightEnd); }} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium" htmlFor="night-end">End time</label>
+                      <Input id="night-end" type="time" value={nightEnd} onChange={(e) => { setNightEnd(e.target.value); nightMode.set(nightStart, e.target.value); }} />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -407,17 +407,17 @@ export function PdfViewer({ bookId }) {
         className={`flex justify-center py-4 px-2 ${pageAnimClass} animate-page-enter`}
         style={{ visibility: loading || error ? "hidden" : "visible", animationDuration: pageAnimation === "none" ? "0ms" : undefined }}
       >
-        <div className={`flex ${dualPageMode ? "gap-2" : ""} items-start justify-center`}>
+        <div className={`flex ${dualPageMode ? "gap-2 flex-row" : ""} items-start justify-center`}>
           <canvas
             ref={canvasRef}
-            className="max-w-full shadow-lg"
+            className={`shadow-lg ${dualPageMode ? "w-[calc(50%-4px)]" : "max-w-full"}`}
             role="img"
             aria-label={`Page ${currentPage} of ${book.totalPages}`}
           />
           {dualPageMode && (
             <canvas
               ref={canvasRef2}
-              className="max-w-full shadow-lg"
+              className="shadow-lg w-[calc(50%-4px)]"
               role="img"
               aria-label={`Page ${currentPage + 1} of ${book.totalPages}`}
             />
