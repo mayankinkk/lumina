@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
@@ -19,10 +19,43 @@ export function BookCard({ book }) {
   const updateBook = useStore((s) => s.updateBook);
   const addTagToBook = useStore((s) => s.addTagToBook);
   const removeTagFromBook = useStore((s) => s.removeTagFromBook);
+  const saveCover = useStore((s) => s.saveCover);
+  const loadCover = useStore((s) => s.loadCover);
+  const removeCover = useStore((s) => s.removeCover);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(book.title);
   const [editAuthor, setEditAuthor] = useState(book.author);
+  const [coverUrl, setCoverUrl] = useState(null);
+  const coverInputRef = useRef(null);
+
+  useEffect(() => {
+    if (book.coverUrl) {
+      setCoverUrl(book.coverUrl);
+    } else {
+      loadCover(book.id).then((url) => {
+        if (url) setCoverUrl(url);
+      });
+    }
+  }, [book.id, book.coverUrl, loadCover]);
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target.result;
+      setCoverUrl(dataUrl);
+      await saveCover(book.id, dataUrl);
+    };
+    reader.readAsDataURL(file);
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  };
+
+  const handleRemoveCover = async () => {
+    setCoverUrl(null);
+    await removeCover(book.id);
+  };
 
   const statusConfig = {
     reading: { label: "READING", icon: BookOpen, variant: "default" },
@@ -41,18 +74,22 @@ export function BookCard({ book }) {
             "overflow-hidden transition-all hover:shadow-md",
             book.status === "finished" && "opacity-75 hover:opacity-100"
           )}>
-            <div className={cn("aspect-[3/4] flex items-center justify-center p-6 relative", coverColor)}>
+            <div className={cn("aspect-[3/4] flex items-center justify-center p-6 relative overflow-hidden", !coverUrl && coverColor)}>
               {book.status === "finished" && (
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors z-10" />
               )}
-              <div className="text-center relative z-10">
-                <p className="font-literata text-base font-semibold leading-tight">
-                  {book.title}
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {book.author}
-                </p>
-              </div>
+              {coverUrl ? (
+                <img src={coverUrl} alt={book.title} className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="text-center relative z-10">
+                  <p className="font-literata text-base font-semibold leading-tight">
+                    {book.title}
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {book.author}
+                  </p>
+                </div>
+              )}
             </div>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
@@ -125,6 +162,20 @@ export function BookCard({ book }) {
                 onAdd={(tag) => addTagToBook(book.id, tag)}
                 onRemove={(tag) => removeTagFromBook(book.id, tag)}
               />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Cover Image</label>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => coverInputRef.current?.click()}>
+                  <Upload className="h-3.5 w-3.5 mr-1.5" /> Upload Cover
+                </Button>
+                {coverUrl && (
+                  <Button variant="ghost" size="sm" onClick={handleRemoveCover}>
+                    Remove
+                  </Button>
+                )}
+                <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+              </div>
             </div>
           </div>
           <DialogFooter>
