@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock, Moon } from "lucide-react";
+import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock, Moon, Timer } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
@@ -42,6 +42,8 @@ export default function SettingsPage() {
   const tapZones = useStore((s) => s.tapZones);
   const swipeThreshold = useStore((s) => s.swipeThreshold);
   const setSwipeThreshold = useStore((s) => s.setSwipeThreshold);
+  const readingTimer = useStore((s) => s.readingTimer);
+  const setReadingTimer = useStore((s) => s.setReadingTimer);
 
   const handleLockEnable = () => {
     if (lockPassword.length >= 4 && lockPassword === lockConfirm) {
@@ -324,6 +326,60 @@ export default function SettingsPage() {
                   </div>
                   <Switch defaultChecked disabled />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Timer className="h-4 w-4" /> Reading Timer
+                </CardTitle>
+                <CardDescription>Pomodoro-style timed reading sessions with breaks</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Enable timer</p>
+                  <Switch
+                    checked={readingTimer.enabled}
+                    onCheckedChange={(checked) => setReadingTimer({ enabled: checked })}
+                  />
+                </div>
+                {readingTimer.enabled && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Session duration: {readingTimer.duration} min</label>
+                      <div className="flex gap-2">
+                        {[25, 30, 45, 60].map((d) => (
+                          <Button
+                            key={d}
+                            variant={readingTimer.duration === d ? "default" : "outline"}
+                            size="sm"
+                            className="flex-1 h-8 text-xs"
+                            onClick={() => setReadingTimer({ duration: d })}
+                          >
+                            {d} min
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Break duration: {readingTimer.breakDuration} min</label>
+                      <div className="flex gap-2">
+                        {[5, 10, 15].map((d) => (
+                          <Button
+                            key={d}
+                            variant={readingTimer.breakDuration === d ? "default" : "outline"}
+                            size="sm"
+                            className="flex-1 h-8 text-xs"
+                            onClick={() => setReadingTimer({ breakDuration: d })}
+                          >
+                            {d} min
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

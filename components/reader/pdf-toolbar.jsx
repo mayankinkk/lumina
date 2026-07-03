@@ -17,7 +17,8 @@ import { ThemeControls } from "./theme-controls";
 import { BookmarkPanel } from "./bookmark-panel";
 import { ChapterPanel } from "./chapter-panel";
 import { PresetControls } from "./preset-controls";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Timer } from "lucide-react";
+import { TimerControls } from "./timer-controls";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
@@ -77,6 +78,7 @@ export function PdfToolbar({ bookId }) {
   const autoHideToolbar = useStore((s) => s.autoHideToolbar);
   const setAutoHideToolbar = useStore((s) => s.setAutoHideToolbar);
   const [chapterOpen, setChapterOpen] = useState(false);
+  const [timerOpen, setTimerOpen] = useState(false);
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -160,6 +162,22 @@ export function PdfToolbar({ bookId }) {
             </Button>
           )}
           <TtsControls content={textContent} />
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setTimerOpen(!timerOpen)}
+              aria-label="Reading timer"
+            >
+              <Timer className="h-4 w-4" />
+            </Button>
+            {timerOpen && (
+              <div className="absolute right-0 top-full mt-1 z-30 w-auto rounded-lg border bg-popover p-3 shadow-lg">
+                <TimerControls />
+              </div>
+            )}
+          </div>
           {book?.format === "epub" && (
             <Button
               variant={chapterOpen ? "default" : "ghost"}
