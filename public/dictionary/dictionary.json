@@ -1,0 +1,344 @@
+{
+  "abandon": {
+    "word": "abandon",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To leave behind or give up completely", "example": "They had to abandon the project due to lack of funding." }
+    ]
+  },
+  "ability": {
+    "word": "ability",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "The power or skill to do something", "example": "She has the ability to learn languages quickly." }
+    ]
+  },
+  "abroad": {
+    "word": "abroad",
+    "definitions": [
+      { "partOfSpeech": "adverb", "definition": "In or to a foreign country", "example": "He dreams of studying abroad." }
+    ]
+  },
+  "absent": {
+    "word": "absent",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Not present in a place", "example": "Three students were absent from class today." }
+    ]
+  },
+  "absorb": {
+    "word": "absorb",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To take in or soak up something", "example": "The fabric absorbs moisture quickly." }
+    ]
+  },
+  "accent": {
+    "word": "accent",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A distinctive way of pronouncing a language", "example": "She speaks English with a French accent." }
+    ]
+  },
+  "accept": {
+    "word": "accept",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To agree to receive something offered", "example": "I happily accept your invitation." }
+    ]
+  },
+  "access": {
+    "word": "access",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "The means or opportunity to approach something", "example": "Students have access to the library until midnight." }
+    ]
+  },
+  "accident": {
+    "word": "accident",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "An unfortunate event occurring unexpectedly", "example": "The accident caused a traffic jam for hours." }
+    ]
+  },
+  "achieve": {
+    "word": "achieve",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To reach or accomplish a goal", "example": "She worked hard to achieve her dreams." }
+    ]
+  },
+  "acquire": {
+    "word": "acquire",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To gain possession of something", "example": "The company acquired a smaller startup." }
+    ]
+  },
+  "adapt": {
+    "word": "adapt",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To adjust to new conditions", "example": "Animals must adapt to changes in climate." }
+    ]
+  },
+  "adventure": {
+    "word": "adventure",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "An unusual and exciting experience", "example": "Their road trip was a great adventure." }
+    ]
+  },
+  "advise": {
+    "word": "advise",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To offer suggestions or recommendations", "example": "I advise you to double-check your work." }
+    ]
+  },
+  "affect": {
+    "word": "affect",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To influence or have an impact on", "example": "The weather can affect your mood." }
+    ]
+  },
+  "afford": {
+    "word": "afford",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To have enough money to pay for something", "example": "We can afford a new car this year." }
+    ]
+  },
+  "ancient": {
+    "word": "ancient",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Belonging to the very distant past", "example": "They discovered an ancient tomb in Egypt." }
+    ]
+  },
+  "annual": {
+    "word": "annual",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Occurring once every year", "example": "The annual festival attracts thousands of visitors." }
+    ]
+  },
+  "anxious": {
+    "word": "anxious",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Feeling nervous or worried", "example": "She felt anxious before the exam." }
+    ]
+  },
+  "apparent": {
+    "word": "apparent",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Clearly visible or understood", "example": "It was apparent that he was lying." }
+    ]
+  },
+  "appreciate": {
+    "word": "appreciate",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To recognize the value or significance of something", "example": "I appreciate your help with this project." }
+    ]
+  },
+  "attempt": {
+    "word": "attempt",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To make an effort to accomplish something", "example": "She will attempt to break the world record." }
+    ]
+  },
+  "balance": {
+    "word": "balance",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "An even distribution of weight enabling stability", "example": "You need good balance to ride a bicycle." }
+    ]
+  },
+  "bargain": {
+    "word": "bargain",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "An agreement or something bought cheaply", "example": "This coat was a real bargain." }
+    ]
+  },
+  "barrier": {
+    "word": "barrier",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A fence or obstacle that prevents movement", "example": "Language can be a barrier to communication." }
+    ]
+  },
+  "beneath": {
+    "word": "beneath",
+    "definitions": [
+      { "partOfSpeech": "preposition", "definition": "Under or below something", "example": "The cat hid beneath the bed." }
+    ]
+  },
+  "benefit": {
+    "word": "benefit",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "An advantage or gain", "example": "Regular exercise has many health benefits." }
+    ]
+  },
+  "bitter": {
+    "word": "bitter",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Having a sharp, unpleasant taste", "example": "The coffee was too bitter for her." }
+    ]
+  },
+  "blame": {
+    "word": "blame",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To hold someone responsible for wrongdoing", "example": "Don't blame yourself for the mistake." }
+    ]
+  },
+  "bother": {
+    "word": "bother",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To take the trouble or cause inconvenience", "example": "Don't bother calling him; he won't answer." }
+    ]
+  },
+  "boundary": {
+    "word": "boundary",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A line that marks the limits of an area", "example": "The river forms the boundary between the two countries." }
+    ]
+  },
+  "brilliant": {
+    "word": "brilliant",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Exceptionally clever or bright", "example": "She had a brilliant idea for the campaign." }
+    ]
+  },
+  "capable": {
+    "word": "capable",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Having the ability or skill to do something", "example": "He is capable of solving complex problems." }
+    ]
+  },
+  "capture": {
+    "word": "capture",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To take possession or control of something", "example": "The photographer captured the sunset beautifully." }
+    ]
+  },
+  "caution": {
+    "word": "caution",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "Care taken to avoid danger or mistakes", "example": "Exercise caution when driving in the rain." }
+    ]
+  },
+  "challenge": {
+    "word": "challenge",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A task or situation that tests abilities", "example": "Climbing the mountain was a real challenge." }
+    ]
+  },
+  "character": {
+    "word": "character",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "The mental and moral qualities of an individual", "example": "Honesty is an important character trait." }
+    ]
+  },
+  "circumstance": {
+    "word": "circumstance",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A condition or fact affecting a situation", "example": "Under no circumstance should you open the door." }
+    ]
+  },
+  "comfort": {
+    "word": "comfort",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A state of physical ease and freedom from pain", "example": "She settled into the chair with comfort." }
+    ]
+  },
+  "command": {
+    "word": "command",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To give an order or directive", "example": "The general commanded his troops to advance." }
+    ]
+  },
+  "compare": {
+    "word": "compare",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To examine for similarities and differences", "example": "Compare the prices before making a decision." }
+    ]
+  },
+  "compete": {
+    "word": "compete",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To strive against others to win", "example": "Athletes from around the world compete in the Olympics." }
+    ]
+  },
+  "concentrate": {
+    "word": "concentrate",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To focus one's attention or effort", "example": "I need to concentrate on my studies." }
+    ]
+  },
+  "confident": {
+    "word": "confident",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Feeling sure of oneself and one's abilities", "example": "She felt confident about passing the test." }
+    ]
+  },
+  "conscious": {
+    "word": "conscious",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Being aware of one's surroundings or thoughts", "example": "He was conscious of the noise in the room." }
+    ]
+  },
+  "consequence": {
+    "word": "consequence",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "The result or effect of an action", "example": "Every action has a consequence." }
+    ]
+  },
+  "constant": {
+    "word": "constant",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Occurring continuously over a period of time", "example": "The machine requires constant maintenance." }
+    ]
+  },
+  "contain": {
+    "word": "contain",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To hold or have within", "example": "This box contains old photographs." }
+    ]
+  },
+  "contribute": {
+    "word": "contribute",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To give something to a common cause", "example": "Everyone should contribute to the team effort." }
+    ]
+  },
+  "convey": {
+    "word": "convey",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To communicate or transmit an idea", "example": "Her words conveyed deep emotion." }
+    ]
+  },
+  "convince": {
+    "word": "convince",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To persuade someone to believe something", "example": "He convinced me to try the new restaurant." }
+    ]
+  },
+  "courage": {
+    "word": "courage",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "The ability to do something that frightens you", "example": "It took courage to speak in front of the crowd." }
+    ]
+  },
+  "curious": {
+    "word": "curious",
+    "definitions": [
+      { "partOfSpeech": "adjective", "definition": "Eager to know or learn something", "example": "Children are naturally curious about the world." }
+    ]
+  },
+  "decade": {
+    "word": "decade",
+    "definitions": [
+      { "partOfSpeech": "noun", "definition": "A period of ten years", "example": "Technology has advanced rapidly in the past decade." }
+    ]
+  },
+  "declare": {
+    "word": "declare",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To announce formally or officially", "example": "The president will declare a national holiday." }
+    ]
+  },
+  "decline": {
+    "word": "decline",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To decrease or become weaker", "example": "The population of the village has declined." }
+    ]
+  },
+  "defend": {
+    "word": "defend",
+    "definitions": [
+      { "partOfSpeech": "verb", "definition": "To protect from harm or attack", "example": "Soldiers defend the country's borders." }
+    ]
+  }
+}

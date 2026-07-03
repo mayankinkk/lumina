@@ -4,7 +4,7 @@ import { useState } from "react";
 import useStore from "@/lib/store";
 import { AiDrawer } from "./ai-drawer";
 import { useTts } from "@/hooks/use-tts";
-import { useDictionary } from "@/hooks/use-dictionary";
+import { useOfflineDictionary } from "@/hooks/use-offline-dictionary";
 import { Loader2 } from "lucide-react";
 
 const actions = [
@@ -29,7 +29,7 @@ export function ContextMenuPopup({ text, bookId }) {
   const addHighlight = useStore((s) => s.addHighlight);
   const addNote = useStore((s) => s.addNote);
   const { speak, stop, speaking } = useTts();
-  const dict = useDictionary();
+  const dict = useOfflineDictionary();
 
   const handleAction = (actionId) => {
     if (actionId === "copy") {
@@ -121,13 +121,20 @@ export function ContextMenuPopup({ text, bookId }) {
       )}
 
       {showDict && (() => {
-        const { result, loading, error, clear } = dict;
+        const { result, loading, error, clear, source } = dict;
         return (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm lg:items-center" onClick={() => { setShowDict(false); clear(); }}>
             <div className="w-full max-w-lg rounded-t-2xl border bg-background p-6 shadow-xl lg:rounded-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-semibold">Dictionary</h3>
-                <button onClick={() => { setShowDict(false); clear(); }} className="text-muted-foreground hover:text-foreground">✕</button>
+                <div className="flex items-center gap-2">
+                  {source && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${source === "offline" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"}`}>
+                      {source === "offline" ? "Offline" : "Online"}
+                    </span>
+                  )}
+                  <button onClick={() => { setShowDict(false); clear(); }} className="text-muted-foreground hover:text-foreground">✕</button>
+                </div>
               </div>
               {loading && (
                 <div className="flex items-center justify-center py-8">

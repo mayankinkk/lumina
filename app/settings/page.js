@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock, Moon, Timer } from "lucide-react";
+import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock, Moon, Timer, BookOpen, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
@@ -25,6 +25,7 @@ import { useGdrive } from "@/hooks/use-gdrive";
 import { useDropbox } from "@/hooks/use-dropbox";
 import { useAppLock } from "@/hooks/use-app-lock";
 import { useNightModeScheduler, getSchedule } from "@/hooks/use-night-mode-scheduler";
+import { useOfflineDictionary } from "@/hooks/use-offline-dictionary";
 
 export default function SettingsPage() {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function SettingsPage() {
 
   const appLock = useAppLock();
   const nightMode = useNightModeScheduler();
+  const offlineDict = useOfflineDictionary();
   const [lockPassword, setLockPassword] = useState("");
   const [lockConfirm, setLockConfirm] = useState("");
   const [nightStart, setNightStart] = useState("20:00");
@@ -722,6 +724,67 @@ export default function SettingsPage() {
                     AI_API_KEY=your_key_here
                   </code>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" /> Offline Dictionary
+                </CardTitle>
+                <CardDescription>
+                  {offlineDict.hasDictionary
+                    ? `${offlineDict.dictionarySize} words available offline`
+                    : "Download a built-in word list for offline lookups"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">
+                      Status:{" "}
+                      {offlineDict.hasDictionary
+                        ? `${offlineDict.dictionarySize} words`
+                        : "Not downloaded"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {offlineDict.hasDictionary
+                        ? "Dictionary lookups will check local storage first"
+                        : "No offline dictionary installed"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  {!offlineDict.hasDictionary ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={offlineDict.downloadDictionary}
+                      disabled={offlineDict.offlineLoading}
+                    >
+                      {offlineDict.offlineLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      Download Dictionary (~{offlineDict.dictionarySize || 50} words)
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={offlineDict.deleteDictionary}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Dictionary
+                    </Button>
+                  )}
+                </div>
+                {offlineDict.offlineLoading && (
+                  <p className="text-xs text-muted-foreground animate-pulse">
+                    Downloading dictionary...
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
