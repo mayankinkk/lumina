@@ -4,12 +4,15 @@ import { useState } from "react";
 import useStore from "@/lib/store";
 import { AiDrawer } from "./ai-drawer";
 import { useTts } from "@/hooks/use-tts";
+import { useDictionary } from "@/hooks/use-dictionary";
+import { Loader2 } from "lucide-react";
 
 const actions = [
   { label: "Define", icon: "📖", id: "define" },
   { label: "Explain", icon: "💡", id: "explain" },
   { label: "Translate", icon: "🌐", id: "translate" },
   { label: "Read", icon: "🔊", id: "read" },
+  { label: "Dictionary", icon: "📕", id: "dictionary" },
   { label: "Highlight", icon: "🖍️", id: "highlight" },
   { label: "Underline", icon: "📄", id: "underline" },
   { label: "Strikethrough", icon: "✂️", id: "strikethrough" },
@@ -20,11 +23,13 @@ const actions = [
 
 export function ContextMenuPopup({ text, bookId }) {
   const [showAiDrawer, setShowAiDrawer] = useState(false);
+  const [showDict, setShowDict] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
   const addVocabularyWord = useStore((s) => s.addVocabularyWord);
   const addHighlight = useStore((s) => s.addHighlight);
   const addNote = useStore((s) => s.addNote);
   const { speak, stop, speaking } = useTts();
+  const dict = useDictionary();
 
   const handleAction = (actionId) => {
     if (actionId === "copy") {
@@ -79,6 +84,10 @@ export function ContextMenuPopup({ text, bookId }) {
       if (speaking) stop();
       speak(text);
     }
+    if (actionId === "dictionary") {
+      dict.lookup(text);
+      setShowDict(true);
+    }
     if (actionId === "define" || actionId === "explain" || actionId === "translate") {
       setActiveAction(actionId);
       setShowAiDrawer(true);
@@ -110,6 +119,55 @@ export function ContextMenuPopup({ text, bookId }) {
           }}
         />
       )}
+
+      {showDict && (() => {
+        const { result, loading, error, clear } = dict;
+        return (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm lg:items-center" onClick={() => { setShowDict(false); clear(); }}>
+            <div className="w-full max-w-lg rounded-t-2xl border bg-background p-6 shadow-xl lg:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-semibold">Dictionary</h3>
+                <button onClick={() => { setShowDict(false); clear(); }} className="text-muted-foreground hover:text-foreground">✕</button>
+              </div>
+              {loading && (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+              {error && (
+                <div className="rounded-lg border-l-2 border-destructive bg-destructive/5 p-3">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
+              {result && (
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xl font-bold font-literata">{result.word}</p>
+                    {result.phonetic && <p className="text-sm text-muted-foreground">{result.phonetic}</p>}
+                    {result.audio && (
+                      <audio controls className="mt-1 h-8 w-full max-w-[200px]">
+                        <source src={result.audio} type="audio/mpeg" />
+                      </audio>
+                    )}
+                  </div>
+                  <div className="space-y-3 max-h-[40vh] overflow-y-auto">
+                    {result.meanings.slice(0, 6).map((m, i) => (
+                      <div key={i} className="rounded-lg border-l-2 border-primary bg-primary/5 p-3">
+                        <p className="text-xs font-medium text-primary uppercase mb-1">{m.partOfSpeech}</p>
+                        <p className="text-sm">{m.definition}</p>
+                        {m.example && <p className="mt-1 text-xs italic text-muted-foreground">&ldquo;{m.example}&rdquo;</p>}
+                        {m.synonyms.length > 0 && (
+                          <p className="mt-1 text-xs text-muted-foreground">Synonyms: {m.synonyms.join(", ")}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }
