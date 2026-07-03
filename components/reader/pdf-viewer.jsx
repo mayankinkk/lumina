@@ -15,10 +15,11 @@ import { ReadingRuler } from "./reading-ruler";
 import { BreakReminderModal } from "./break-reminder";
 
 export function PdfViewer({ bookId }) {
-  const { zoom, currentPage, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook, hydrated } = useStore(
+  const { zoom, currentPage, totalPages, setCurrentPage, setTotalPages, allBooks, loadFileData, updateBook, hydrated } = useStore(
     useShallow((s) => ({
       zoom: s.zoom,
       currentPage: s.currentPage,
+      totalPages: s.totalPages,
       setCurrentPage: s.setCurrentPage,
       setTotalPages: s.setTotalPages,
       allBooks: s.books,
