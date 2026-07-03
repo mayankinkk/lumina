@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Type, AlignLeft, Hyphen } from "lucide-react";
+import { Type, AlignLeft, AlignJustify } from "lucide-react";
 import { useState } from "react";
 
 const fonts = [
@@ -107,7 +107,7 @@ export function FontControls() {
               <Switch checked={readerJustify} onCheckedChange={setReaderJustify} />
             </div>
             <div className="flex items-center justify-between">
-              <Label className="text-[10px] text-muted-foreground flex items-center gap-1"><Hyphen className="h-3 w-3" /> Hyphenation</Label>
+              <Label className="text-[10px] text-muted-foreground flex items-center gap-1"><AlignJustify className="h-3 w-3" /> Hyphenation</Label>
               <Switch checked={readerHyphenation} onCheckedChange={setReaderHyphenation} />
             </div>
           </div>
