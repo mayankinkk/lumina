@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PdfToolbar, PdfViewer } from "@/components/reader/pdf-viewer";
 import { useReadingTracker } from "@/hooks/use-reading-tracker";
 import { BreakReminderModal } from "@/components/reader/break-reminder";
+import { useToast } from "@/components/toast";
 import useStore from "@/lib/store";
 
 export default function ReaderPage() {
@@ -13,6 +14,31 @@ export default function ReaderPage() {
   const bookId = params.id;
 
   useReadingTracker(bookId);
+
+  const { toast } = useToast();
+  const book = useStore((s) => s.books.find((b) => b.id === bookId));
+  const getNextInQueue = useStore((s) => s.getNextInQueue);
+  const removeFromReadingQueue = useStore((s) => s.removeFromReadingQueue);
+  const prevStatusRef = useRef(book?.status);
+
+  const status = book?.status;
+
+  useEffect(() => {
+    if (!status) return;
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = status;
+    if (prev !== "finished" && status === "finished") {
+      const nextId = getNextInQueue(bookId);
+      if (nextId) {
+        removeFromReadingQueue(bookId);
+        toast(`Opening next book in queue...`, "success");
+        const timer = setTimeout(() => {
+          router.push(`/reader/${nextId}`);
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [status, bookId, getNextInQueue, removeFromReadingQueue, router, toast]);
 
   useEffect(() => {
     const handler = (e) => {

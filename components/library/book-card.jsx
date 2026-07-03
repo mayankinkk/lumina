@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
@@ -22,6 +22,8 @@ export function BookCard({ book }) {
   const saveCover = useStore((s) => s.saveCover);
   const loadCover = useStore((s) => s.loadCover);
   const removeCover = useStore((s) => s.removeCover);
+  const addToReadingQueue = useStore((s) => s.addToReadingQueue);
+  const readingQueue = useStore((s) => s.readingQueue);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(book.title);
@@ -134,6 +136,11 @@ export function BookCard({ book }) {
           </Card>
         </Link>
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {!readingQueue.includes(book.id) && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 bg-background/80 hover:bg-background" onClick={(e) => { e.preventDefault(); addToReadingQueue(book.id); }} aria-label={`Add ${book.title} to queue`}>
+              <List className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="h-7 w-7 bg-background/80 hover:bg-background" onClick={(e) => { e.preventDefault(); setEditTitle(book.title); setEditAuthor(book.author); setEditOpen(true); }} aria-label={`Edit ${book.title}`}>
             <Pencil className="h-3.5 w-3.5" />
           </Button>

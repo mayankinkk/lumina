@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Grid3X3, List, Search, BookOpen, ArrowUpDown } from "lucide-react";
 import useStore from "@/lib/store";
 import { OpdsBrowser } from "@/components/library/opds-browser";
+import { ReadingQueue } from "@/components/reading-queue";
 
 const statusFilters = [
   { label: "All", value: "all" },
@@ -121,6 +122,7 @@ export default function LibraryPage() {
                     <List className="h-4 w-4" />
                   </Button>
                 </div>
+                <ReadingQueue />
                 <OpdsBrowser />
               </div>
             </div>
