@@ -41,6 +41,9 @@ export default function SettingsPage() {
   const [nightStart, setNightStart] = useState("20:00");
   const [nightEnd, setNightEnd] = useState("07:00");
   const [tapZoneOpen, setTapZoneOpen] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    typeof window !== "undefined" && localStorage.getItem("lumina_reading_insights_enabled") !== "false"
+  );
   const tapZones = useStore((s) => s.tapZones);
   const swipeThreshold = useStore((s) => s.swipeThreshold);
   const setSwipeThreshold = useStore((s) => s.setSwipeThreshold);
@@ -382,6 +385,27 @@ export default function SettingsPage() {
                     </div>
                   </>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Bell className="h-4 w-4" /> Reading Insights
+                </CardTitle>
+                <CardDescription>Get reminders and daily summaries</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Reading insight notifications</p>
+                  <Switch
+                    checked={notificationsEnabled}
+                    onCheckedChange={(checked) => {
+                      setNotificationsEnabled(checked);
+                      localStorage.setItem("lumina_reading_insights_enabled", String(checked));
+                    }}
+                  />
+                </div>
               </CardContent>
             </Card>
 
