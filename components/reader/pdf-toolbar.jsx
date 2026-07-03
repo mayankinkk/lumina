@@ -14,6 +14,8 @@ import { useShallow } from "zustand/react/shallow";
 import { TtsControls } from "./tts-controls";
 import { FontControls } from "./font-controls";
 import { ThemeControls } from "./theme-controls";
+import { BookmarkPanel } from "./bookmark-panel";
+import { Bookmark } from "lucide-react";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
@@ -69,6 +71,7 @@ export function PdfToolbar({ bookId }) {
   const [autoScrollOpen, setAutoScrollOpen] = useState(false);
   const [pageAnimOpen, setPageAnimOpen] = useState(false);
   const [blueLightOpen, setBlueLightOpen] = useState(false);
+  const [bookmarkOpen, setBookmarkOpen] = useState(false);
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -160,6 +163,15 @@ export function PdfToolbar({ bookId }) {
             aria-label="Reading ruler"
           >
             <Ruler className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={bookmarkOpen ? "default" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setBookmarkOpen(!bookmarkOpen)}
+            aria-label="Bookmarks"
+          >
+            <Bookmark className="h-4 w-4" />
           </Button>
           <Button
             variant={dualPageMode ? "default" : "ghost"}
@@ -372,6 +384,10 @@ export function PdfToolbar({ bookId }) {
         <div className="px-3 pb-2 lg:px-4">
           <Progress value={book.progress} className="h-0.5" />
         </div>
+      )}
+
+      {bookmarkOpen && (
+        <BookmarkPanel bookId={bookId} currentPage={currentPage} onClose={() => setBookmarkOpen(false)} onJumpToPage={(p) => setCurrentPage(p)} />
       )}
     </div>
   );
