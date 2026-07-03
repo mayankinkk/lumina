@@ -34,6 +34,7 @@ export function PdfViewer({ bookId }) {
   const blueLightFilter = useStore((s) => s.blueLightFilter);
   const readerTheme = useStore((s) => s.readerTheme);
   const readerBackground = useStore((s) => s.readerBackground);
+  const customThemeColors = useStore((s) => s.customThemeColors);
   const dualPageMode = useStore((s) => s.dualPageMode);
   const searchQuery = useStore((s) => s.searchQuery);
   const searchResults = useStore((s) => s.searchResults);
@@ -380,7 +381,11 @@ export function PdfViewer({ bookId }) {
   return (
     <div
       ref={containerRef}
-      className={`relative flex-1 overflow-auto ${readerTheme !== "default" ? `theme-${readerTheme}` : ""} ${readerBackground !== "default" ? `bg-${readerBackground}` : ""}`}
+      className={`relative flex-1 overflow-auto ${readerTheme !== "default" && readerTheme !== "custom" ? `theme-${readerTheme}` : ""} ${readerBackground !== "default" ? `bg-${readerBackground}` : ""}`}
+      style={readerTheme === "custom" && customThemeColors ? {
+        backgroundColor: customThemeColors.background,
+        color: customThemeColors.text,
+      } : undefined}
       onMouseUp={handleTextSelection}
       onClick={(e) => { dismissContextMenu(); handleClickZone(e); }}
       onTouchStart={handleTouchStart}
@@ -400,6 +405,8 @@ export function PdfViewer({ bookId }) {
           </Button>
         </div>
       )}
+
+      <div className="fixed inset-0 pointer-events-none z-10" style={readerTheme === "custom" && customThemeColors ? { backgroundColor: customThemeColors.background, opacity: 0.92, mixBlendMode: "difference" } : undefined} />
 
       {/* Always keep canvas mounted so page turns don't cause a blank flash.
           Use visibility (not display:none) to preserve canvas dimensions. */}
