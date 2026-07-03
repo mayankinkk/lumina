@@ -251,12 +251,14 @@ export function PdfViewer({ bookId }) {
 
   const handleTouchEnd = useCallback((e) => {
     if (selectedText) return;
-    const dual = useStore.getState().dualPageMode;
+    const state = useStore.getState();
+    const dual = state.dualPageMode;
+    const threshold = state.swipeThreshold;
     const step = dual ? 2 : 1;
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartX.current;
     const dy = touch.clientY - touchStartY.current;
-    if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) {
+    if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy)) {
       if (dx < 0 && currentPage < totalPages) {
         setCurrentPage(Math.min(totalPages, currentPage + step));
       } else if (dx > 0 && currentPage > 1) {

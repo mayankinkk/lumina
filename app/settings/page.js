@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock, Moon } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,8 @@ export default function SettingsPage() {
   const [lockConfirm, setLockConfirm] = useState("");
   const [nightStart, setNightStart] = useState("20:00");
   const [nightEnd, setNightEnd] = useState("07:00");
+  const swipeThreshold = useStore((s) => s.swipeThreshold);
+  const setSwipeThreshold = useStore((s) => s.setSwipeThreshold);
 
   const handleLockEnable = () => {
     if (lockPassword.length >= 4 && lockPassword === lockConfirm) {
@@ -384,8 +387,25 @@ export default function SettingsPage() {
                   </div>
                   <ThemeToggle />
                 </div>
+</CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <span className="text-lg">👆</span> Gestures
+                </CardTitle>
+                <CardDescription>Configure swipe sensitivity for page turning</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Swipe threshold: {swipeThreshold}px</label>
+                  <Slider min={10} max={100} step={5} value={[swipeThreshold]} onValueChange={([v]) => setSwipeThreshold(v)} />
+                  <p className="text-xs text-muted-foreground">Lower = more sensitive, Higher = requires longer swipe</p>
+                </div>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
