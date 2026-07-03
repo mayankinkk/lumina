@@ -125,11 +125,28 @@ export default function SettingsPage() {
   };
 
   const handleExport = () => {
+    const s = useStore.getState();
     const data = {
       books: books.map(({ fileData, ...b }) => b),
       vocabulary,
       notes,
       highlights,
+      bookmarks: s.bookmarks,
+      readingSessions: s.readingSessions,
+      settings: {
+        dailyGoal: s.dailyGoal,
+        weeklyGoal: s.weeklyGoal,
+        goalMode: s.goalMode,
+        readerTheme: s.readerTheme,
+        readerBackground: s.readerBackground,
+        readerFontFamily: s.readerFontFamily,
+        readerFontSize: s.readerFontSize,
+        readerLineHeight: s.readerLineHeight,
+        readerJustify: s.readerJustify,
+        zoom: s.zoom,
+        blueLightFilter: s.blueLightFilter,
+        customThemeColors: s.customThemeColors,
+      },
       exportedAt: new Date().toISOString(),
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -168,6 +185,25 @@ export default function SettingsPage() {
         if (data.highlights) {
           const store = useStore.getState();
           data.highlights.forEach((h) => store.addHighlight(h));
+        }
+        if (data.bookmarks) {
+          const store = useStore.getState();
+          data.bookmarks.forEach((b) => store.addBookmark(b));
+        }
+        if (data.settings) {
+          const store = useStore.getState();
+          if (data.settings.dailyGoal !== undefined) store.setDailyGoal(data.settings.dailyGoal);
+          if (data.settings.weeklyGoal !== undefined) store.setWeeklyGoal(data.settings.weeklyGoal);
+          if (data.settings.goalMode) store.setGoalMode(data.settings.goalMode);
+          if (data.settings.readerTheme) store.setReaderTheme(data.settings.readerTheme);
+          if (data.settings.readerBackground) store.setReaderBackground(data.settings.readerBackground);
+          if (data.settings.readerFontFamily) store.setReaderFontFamily(data.settings.readerFontFamily);
+          if (data.settings.readerFontSize) store.setReaderFontSize(data.settings.readerFontSize);
+          if (data.settings.readerLineHeight) store.setReaderLineHeight(data.settings.readerLineHeight);
+          if (data.settings.readerJustify !== undefined) store.setReaderJustify(data.settings.readerJustify);
+          if (data.settings.zoom) store.setZoom(data.settings.zoom);
+          if (data.settings.blueLightFilter !== undefined) store.setBlueLightFilter(data.settings.blueLightFilter);
+          if (data.settings.customThemeColors) store.setCustomThemeColors(data.settings.customThemeColors);
         }
         window.location.reload();
       } catch {
