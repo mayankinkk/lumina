@@ -16,6 +16,7 @@ import { FontControls } from "./font-controls";
 import { ThemeControls } from "./theme-controls";
 import { BookmarkPanel } from "./bookmark-panel";
 import { ChapterPanel } from "./chapter-panel";
+import { PresetControls } from "./preset-controls";
 import { Bookmark } from "lucide-react";
 
 export function PdfToolbar({ bookId }) {
@@ -197,6 +198,7 @@ export function PdfToolbar({ bookId }) {
           >
             <Columns className="h-4 w-4" />
           </Button>
+          <PresetControls />
           <FontControls />
           <ThemeControls />
           <div className="relative">
