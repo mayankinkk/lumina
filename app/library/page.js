@@ -30,10 +30,12 @@ export default function LibraryPage() {
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => {
+      const q = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase());
+        book.title.toLowerCase().includes(q) ||
+        (book.author || "").toLowerCase().includes(q) ||
+        (book.tags || []).some((t) => t.toLowerCase().includes(q));
       const matchesFilter = activeFilter === "all" || book.status === activeFilter;
       const matchesTag = !activeTag || (book.tags || []).includes(activeTag);
       return matchesSearch && matchesFilter && matchesTag;
