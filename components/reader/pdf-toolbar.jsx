@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns, List } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns, List, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +73,8 @@ export function PdfToolbar({ bookId }) {
   const [pageAnimOpen, setPageAnimOpen] = useState(false);
   const [blueLightOpen, setBlueLightOpen] = useState(false);
   const [bookmarkOpen, setBookmarkOpen] = useState(false);
+  const autoHideToolbar = useStore((s) => s.autoHideToolbar);
+  const setAutoHideToolbar = useStore((s) => s.setAutoHideToolbar);
   const [chapterOpen, setChapterOpen] = useState(false);
 
   const handlePageJump = (e) => {
@@ -327,6 +329,15 @@ export function PdfToolbar({ bookId }) {
               </div>
             )}
           </div>
+          <Button
+            variant={autoHideToolbar ? "default" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setAutoHideToolbar(!autoHideToolbar)}
+            aria-label="Toggle fullscreen mode"
+          >
+            {autoHideToolbar ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
           <Button
             variant="ghost"
             size="icon"

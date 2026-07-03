@@ -6,6 +6,7 @@ import { PdfToolbar, PdfViewer } from "@/components/reader/pdf-viewer";
 import { useReadingTracker } from "@/hooks/use-reading-tracker";
 import { BreakReminderModal } from "@/components/reader/break-reminder";
 import { useToast } from "@/components/toast";
+import { useIdle } from "@/hooks/use-idle";
 import useStore from "@/lib/store";
 
 export default function ReaderPage() {
@@ -102,9 +103,19 @@ export default function ReaderPage() {
     return () => window.removeEventListener("beforeunload", handler);
   }, []);
 
+  const { idle } = useIdle(3000);
+  const autoHideToolbar = useStore((s) => s.autoHideToolbar);
+  const toolbarHidden = autoHideToolbar && idle;
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <PdfToolbar bookId={bookId} />
+    <div
+      className={`flex h-screen flex-col overflow-hidden transition-all duration-300 ${toolbarHidden ? "pt-0" : ""}`}
+    >
+      <div
+        className={`transition-all duration-300 ${toolbarHidden ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}`}
+      >
+        <PdfToolbar bookId={bookId} />
+      </div>
       <PdfViewer bookId={bookId} />
       <BreakReminderModal />
     </div>
