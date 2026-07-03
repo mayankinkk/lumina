@@ -34,6 +34,7 @@ export function PdfViewer({ bookId }) {
   const blueLightFilter = useStore((s) => s.blueLightFilter);
   const readerTheme = useStore((s) => s.readerTheme);
   const readerBackground = useStore((s) => s.readerBackground);
+  const dualPageMode = useStore((s) => s.dualPageMode);
   const searchQuery = useStore((s) => s.searchQuery);
   const searchResults = useStore((s) => s.searchResults);
   const searchCurrentIndex = useStore((s) => s.searchCurrentIndex);
@@ -41,6 +42,7 @@ export function PdfViewer({ bookId }) {
   const setSearchCurrentIndex = useStore((s) => s.setSearchCurrentIndex);
 
   const canvasRef = useRef(null);
+  const canvasRef2 = useRef(null);
   const containerRef = useRef(null);
   const pdfDocRef = useRef(null);
   const renderTaskIdRef = useRef(0);
@@ -142,10 +144,12 @@ export function PdfViewer({ bookId }) {
         const pdf = pdfDocRef.current;
         if (!pdf) return;
 
+        const scale = (zoom / 100) * 1.5;
+
+        // Render left page
         const page = await pdf.getPage(currentPage);
         if (taskId !== renderTaskIdRef.current) return;
 
-        const scale = (zoom / 100) * 1.5;
         const viewport = page.getViewport({ scale });
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -159,6 +163,29 @@ export function PdfViewer({ bookId }) {
         activeRenderTaskRef.current = renderTask;
         await renderTask.promise;
         activeRenderTaskRef.current = null;
+
+        if (taskId !== renderTaskIdRef.current) return;
+
+        // If dual page mode, render page 2 (currentPage+1) on the right canvas
+        const dual = useStore.getState().dualPageMode;
+        if (dual && canvasRef2.current && currentPage < pdf.numPages) {
+          const page2 = await pdf.getPage(currentPage + 1);
+          const vp2 = page2.getViewport({ scale });
+          const c2 = canvasRef2.current;
+          c2.width = vp2.width;
+          c2.height = vp2.height;
+          const ctx2 = c2.getContext("2d");
+          ctx2.clearRect(0, 0, c2.width, c2.height);
+          const rt2 = page2.render({ canvasContext: ctx2, viewport: vp2 });
+          activeRenderTaskRef.current = rt2;
+          await rt2.promise;
+          activeRenderTaskRef.current = null;
+          if (taskId !== renderTaskIdRef.current) return;
+        } else if (canvasRef2.current) {
+          const c2 = canvasRef2.current;
+          const ctx2 = c2.getContext("2d");
+          ctx2.clearRect(0, 0, c2.width || 1, c2.height || 1);
+        }
 
         if (taskId !== renderTaskIdRef.current) return;
 
@@ -203,13 +230,15 @@ export function PdfViewer({ bookId }) {
 
   const handleClickZone = useCallback((e) => {
     if (selectedText) return;
+    const dual = useStore.getState().dualPageMode;
+    const step = dual ? 2 : 1;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const third = rect.width / 3;
     if (x < third && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage(Math.max(1, currentPage - step));
     } else if (x > rect.width - third && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage(Math.min(totalPages, currentPage + step));
     }
   }, [currentPage, totalPages, setCurrentPage, selectedText]);
 
@@ -221,23 +250,25 @@ export function PdfViewer({ bookId }) {
 
   const handleTouchEnd = useCallback((e) => {
     if (selectedText) return;
+    const dual = useStore.getState().dualPageMode;
+    const step = dual ? 2 : 1;
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartX.current;
     const dy = touch.clientY - touchStartY.current;
     if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) {
       if (dx < 0 && currentPage < totalPages) {
-        setCurrentPage(currentPage + 1);
+        setCurrentPage(Math.min(totalPages, currentPage + step));
       } else if (dx > 0 && currentPage > 1) {
-        setCurrentPage(currentPage - 1);
+        setCurrentPage(Math.max(1, currentPage - step));
       }
     } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
       const rect = e.currentTarget.getBoundingClientRect();
       const x = touch.clientX - rect.left;
       const third = rect.width / 3;
       if (x < third && currentPage > 1) {
-        setCurrentPage(currentPage - 1);
+        setCurrentPage(Math.max(1, currentPage - step));
       } else if (x > rect.width - third && currentPage < totalPages) {
-        setCurrentPage(currentPage + 1);
+        setCurrentPage(Math.min(totalPages, currentPage + step));
       }
     }
   }, [currentPage, totalPages, setCurrentPage, selectedText]);
@@ -376,12 +407,22 @@ export function PdfViewer({ bookId }) {
         className={`flex justify-center py-4 px-2 ${pageAnimClass} animate-page-enter`}
         style={{ visibility: loading || error ? "hidden" : "visible", animationDuration: pageAnimation === "none" ? "0ms" : undefined }}
       >
-        <canvas
-          ref={canvasRef}
-          className="max-w-full shadow-lg"
-          role="img"
-          aria-label={`Page ${currentPage} of ${book.totalPages}`}
-        />
+        <div className={`flex ${dualPageMode ? "gap-2" : ""} items-start justify-center`}>
+          <canvas
+            ref={canvasRef}
+            className="max-w-full shadow-lg"
+            role="img"
+            aria-label={`Page ${currentPage} of ${book.totalPages}`}
+          />
+          {dualPageMode && (
+            <canvas
+              ref={canvasRef2}
+              className="max-w-full shadow-lg"
+              role="img"
+              aria-label={`Page ${currentPage + 1} of ${book.totalPages}`}
+            />
+          )}
+        </div>
       </div>
 
       {contextMenu && (

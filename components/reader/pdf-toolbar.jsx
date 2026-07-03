@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,7 @@ export function PdfToolbar({ bookId }) {
   const updateBook = useStore((s) => s.updateBook);
   const [searchOpen, setSearchOpen] = useState(false);
   const [pageInput, setPageInput] = useState("");
-  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed, blueLightFilter, setBlueLightFilter, readingRuler, setReadingRuler, readingRulerStyle, setReadingRulerStyle } = useStore(
+  const { autoScrollMode, autoScrollSpeed, setAutoScrollMode, setAutoScrollSpeed, pageAnimation, pageAnimationSpeed, setPageAnimation, setPageAnimationSpeed, blueLightFilter, setBlueLightFilter, readingRuler, setReadingRuler, readingRulerStyle, setReadingRulerStyle, dualPageMode, setDualPageMode } = useStore(
     useShallow((s) => ({
       autoScrollMode: s.autoScrollMode,
       autoScrollSpeed: s.autoScrollSpeed,
@@ -45,6 +45,8 @@ export function PdfToolbar({ bookId }) {
       setReadingRuler: s.setReadingRuler,
       readingRulerStyle: s.readingRulerStyle,
       setReadingRulerStyle: s.setReadingRulerStyle,
+      dualPageMode: s.dualPageMode,
+      setDualPageMode: s.setDualPageMode,
     }))
   );
   const allBooks = useStore((s) => s.books);
@@ -158,6 +160,15 @@ export function PdfToolbar({ bookId }) {
             aria-label="Reading ruler"
           >
             <Ruler className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={dualPageMode ? "default" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setDualPageMode(!dualPageMode)}
+            aria-label="Dual page mode"
+          >
+            <Columns className="h-4 w-4" />
           </Button>
           <FontControls />
           <ThemeControls />
