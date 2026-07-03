@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw } from "lucide-react";
+import { User, Bell, Shield, Palette, Info, Trash2, Download, Upload, Cloud, RefreshCw, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import useStore from "@/lib/store";
 import { useWebdav } from "@/hooks/use-webdav";
+import { useAppLock } from "@/hooks/use-app-lock";
 
 export default function SettingsPage() {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
@@ -26,6 +27,18 @@ export default function SettingsPage() {
   const vocabulary = useStore((s) => s.vocabulary);
   const notes = useStore((s) => s.notes);
   const highlights = useStore((s) => s.highlights);
+
+  const appLock = useAppLock();
+  const [lockPassword, setLockPassword] = useState("");
+  const [lockConfirm, setLockConfirm] = useState("");
+
+  const handleLockEnable = () => {
+    if (lockPassword.length >= 4 && lockPassword === lockConfirm) {
+      appLock.enable(lockPassword);
+      setLockPassword("");
+      setLockConfirm("");
+    }
+  };
 
   const handleClearAll = async () => {
     const bookIds = books.map((b) => b.id);
@@ -223,6 +236,51 @@ export default function SettingsPage() {
                   </div>
                   <Switch defaultChecked disabled />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Lock className="h-4 w-4" /> App Lock
+                </CardTitle>
+                <CardDescription>Password-protect the app on startup</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {appLock.enabled ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">Lock enabled</p>
+                      <Button variant="destructive" size="sm" onClick={appLock.disable}>
+                        Disable
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Input
+                      type="password"
+                      placeholder="New password (min 4 chars)"
+                      value={lockPassword}
+                      onChange={(e) => setLockPassword(e.target.value)}
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Confirm password"
+                      value={lockConfirm}
+                      onChange={(e) => setLockConfirm(e.target.value)}
+                    />
+                    {lockConfirm && lockPassword !== lockConfirm && (
+                      <p className="text-xs text-destructive">Passwords do not match</p>
+                    )}
+                    <Button
+                      onClick={handleLockEnable}
+                      disabled={lockPassword.length < 4 || lockPassword !== lockConfirm}
+                    >
+                      Enable App Lock
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StoreHydrator } from "@/components/store-hydrator";
 import { ToastProvider } from "@/components/toast";
+import { AppLockProvider } from "@/components/layout/app-lock";
 import "./globals.css";
 
 const literata = Literata({
@@ -58,7 +59,9 @@ export default function RootLayout({ children }) {
           <TooltipProvider>
             <ToastProvider>
               <StoreHydrator />
-              {children}
+              <AppLockProvider>
+                {children}
+              </AppLockProvider>
             </ToastProvider>
           </TooltipProvider>
         </ThemeProvider>
