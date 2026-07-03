@@ -7,12 +7,12 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, List } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, List, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
 
-export function BookListItem({ book }) {
+export function BookListItem({ book, onToggleSelect, isSelected }) {
   const removeBook = useStore((s) => s.removeBook);
   const updateBook = useStore((s) => s.updateBook);
   const addToReadingQueue = useStore((s) => s.addToReadingQueue);
@@ -39,6 +39,19 @@ export function BookListItem({ book }) {
             "flex items-center gap-4 rounded-lg border p-3 transition-colors hover:bg-accent",
             book.status === "finished" && "opacity-70"
           )}>
+            <div
+              className={cn(
+                "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded border transition-colors",
+                isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30"
+              )}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSelect(book.id); }}
+              role="checkbox"
+              aria-checked={isSelected}
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleSelect(book.id); } }}
+            >
+              {isSelected && <Check className="h-3 w-3" />}
+            </div>
             <div className={cn("h-16 w-12 shrink-0 rounded flex items-center justify-center p-1", coverColor)}>
               <p className="font-literata text-[8px] font-semibold text-center leading-tight">
                 {book.title}

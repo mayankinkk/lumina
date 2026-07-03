@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import ShellLayout from "@/components/layout/shell";
 import { UploadZone } from "@/components/library/upload-zone";
 import { BookCard } from "@/components/library/book-card";
 import { BookListItem } from "@/components/library/book-list-item";
+import { BatchActionBar } from "@/components/library/batch-action-bar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,20 @@ export default function LibraryPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeTag, setActiveTag] = useState("");
   const [sortBy, setSortBy] = useState("recent");
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const toggleSelect = useCallback((id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
   const books = useStore((s) => s.books);
   const getAllTags = useStore((s) => s.getAllTags);
   const allTags = useMemo(() => getAllTags(), [books, getAllTags]);
@@ -168,13 +183,13 @@ export default function LibraryPage() {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {sortedBooks.map((book) => (
-                  <BookCard key={book.id} book={book} />
+                  <BookCard key={book.id} book={book} onToggleSelect={toggleSelect} isSelected={selectedIds.has(book.id)} />
                 ))}
               </div>
             ) : (
               <div className="space-y-2">
                 {sortedBooks.map((book) => (
-                  <BookListItem key={book.id} book={book} />
+                  <BookListItem key={book.id} book={book} onToggleSelect={toggleSelect} isSelected={selectedIds.has(book.id)} />
                 ))}
               </div>
             )}
@@ -199,6 +214,10 @@ export default function LibraryPage() {
               Upload a PDF or TXT file to start reading
             </p>
           </div>
+        )}
+
+        {selectedIds.size > 0 && (
+          <BatchActionBar selectedIds={Array.from(selectedIds)} onClearSelection={clearSelection} />
         )}
 
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">

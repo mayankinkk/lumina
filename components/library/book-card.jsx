@@ -8,13 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload, List } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload, List, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
 import { TagInput } from "./tag-input";
 
-export function BookCard({ book }) {
+export function BookCard({ book, onToggleSelect, isSelected }) {
   const removeBook = useStore((s) => s.removeBook);
   const updateBook = useStore((s) => s.updateBook);
   const addTagToBook = useStore((s) => s.addTagToBook);
@@ -71,6 +71,19 @@ export function BookCard({ book }) {
   return (
     <>
       <div className="group relative">
+        <div
+          className={cn(
+            "absolute top-2 left-2 z-20 flex h-6 w-6 cursor-pointer items-center justify-center rounded border transition-colors",
+            isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30 bg-background/80 opacity-0 group-hover:opacity-100"
+          )}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSelect(book.id); }}
+          role="checkbox"
+          aria-checked={isSelected}
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleSelect(book.id); } }}
+        >
+          {isSelected && <Check className="h-3.5 w-3.5" />}
+        </div>
         <Link href={`/reader/${book.id}`}>
           <Card className={cn(
             "overflow-hidden transition-all hover:shadow-md",
