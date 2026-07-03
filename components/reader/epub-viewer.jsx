@@ -55,6 +55,17 @@ export function EpubViewer({ bookId, book }) {
         const total = book.spine?.length || 1;
         setTotalPages(total);
 
+        // Extract TOC from epub navigation
+        try {
+          const nav = await book.navigation;
+          const toc = nav?.toc || [];
+          useStore.getState().setEpubToc(toc);
+        } catch (e) {
+          console.warn("Failed to extract EPUB TOC:", e);
+          useStore.getState().setEpubToc([]);
+        }
+        useStore.getState().setEpubRendition(rendition);
+
         const target = book.currentPage > 0 ? book.currentPage - 1 : 0;
         await rendition.display(target);
 
@@ -82,7 +93,13 @@ export function EpubViewer({ bookId, book }) {
     }
 
     loadEpub();
-    return () => { cancelled = true; if (renditionRef.current) renditionRef.current.destroy(); if (bookRef.current) bookRef.current.destroy(); };
+    return () => {
+      cancelled = true;
+      if (renditionRef.current) renditionRef.current.destroy();
+      if (bookRef.current) bookRef.current.destroy();
+      useStore.getState().setEpubRendition(null);
+      useStore.getState().setEpubToc(null);
+    };
   }, [bookId, book]);
 
   const handleKeyDown = useCallback((e) => {

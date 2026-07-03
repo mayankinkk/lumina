@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { TtsControls } from "./tts-controls";
 import { FontControls } from "./font-controls";
 import { ThemeControls } from "./theme-controls";
 import { BookmarkPanel } from "./bookmark-panel";
+import { ChapterPanel } from "./chapter-panel";
 import { Bookmark } from "lucide-react";
 
 export function PdfToolbar({ bookId }) {
@@ -72,6 +73,7 @@ export function PdfToolbar({ bookId }) {
   const [pageAnimOpen, setPageAnimOpen] = useState(false);
   const [blueLightOpen, setBlueLightOpen] = useState(false);
   const [bookmarkOpen, setBookmarkOpen] = useState(false);
+  const [chapterOpen, setChapterOpen] = useState(false);
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -155,6 +157,17 @@ export function PdfToolbar({ bookId }) {
             </Button>
           )}
           <TtsControls content={textContent} />
+          {book?.format === "epub" && (
+            <Button
+              variant={chapterOpen ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setChapterOpen(true)}
+              aria-label="Table of contents"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant={readingRuler ? "default" : "ghost"}
             size="icon"
@@ -386,6 +399,9 @@ export function PdfToolbar({ bookId }) {
         </div>
       )}
 
+      {chapterOpen && (
+        <ChapterPanel open={chapterOpen} onOpenChange={setChapterOpen} />
+      )}
       {bookmarkOpen && (
         <BookmarkPanel bookId={bookId} currentPage={currentPage} onClose={() => setBookmarkOpen(false)} onJumpToPage={(p) => setCurrentPage(p)} />
       )}
