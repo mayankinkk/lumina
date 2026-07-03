@@ -24,8 +24,8 @@ export function UploadZone() {
     async (file) => {
       const ext = file.name.split(".").pop().toLowerCase();
 
-      if (!["pdf", "txt", "epub", "cbz", "cbr"].includes(ext)) {
-        toast("Unsupported file format. Please upload PDF, EPUB, CBZ, CBR, or TXT files.", "warning");
+      if (!["pdf", "txt", "epub", "cbz", "cbr", "docx", "odt", "rtf", "htm", "html", "md"].includes(ext)) {
+        toast("Unsupported file format. Please upload PDF, EPUB, CBZ, DOCX, ODT, RTF, HTML, MD, or TXT files.", "warning");
         return;
       }
 
@@ -136,6 +136,60 @@ export function UploadZone() {
         addBook(book);
         return book;
       }
+
+      if (ext === "docx") {
+        const arrayBuffer = await file.arrayBuffer();
+        let text = "";
+        try {
+          const mammoth = await import("mammoth");
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          text = result.value;
+        } catch {
+          text = "[Could not extract text from DOCX file]";
+        }
+        const book = {
+          id: crypto.randomUUID(),
+          title: file.name.replace(/\.docx$/i, ""),
+          author: "Unknown Author",
+          format: "txt",
+          status: "reading",
+          totalPages: 1,
+          currentPage: 0,
+          progress: 0,
+          lastOpened: new Date().toISOString(),
+          dateAdded: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          textContent: text,
+        };
+        addBook(book);
+        return book;
+      }
+
+      if (ext === "odt" || ext === "rtf" || ext === "htm" || ext === "html" || ext === "md") {
+        const text = await file.text();
+        // Strip HTML tags for HTML files
+        const cleaned = ["htm", "html"].includes(ext)
+          ? text.replace(/<[^>]*>/g, "").replace(/&[^;]+;/g, " ").replace(/\n{3,}/g, "\n\n").trim()
+          : text;
+        const book = {
+          id: crypto.randomUUID(),
+          title: file.name.replace(new RegExp(`\\.(${ext})$`, "i"), ""),
+          author: "Unknown Author",
+          format: "txt",
+          status: "reading",
+          totalPages: 1,
+          currentPage: 0,
+          progress: 0,
+          lastOpened: new Date().toISOString(),
+          dateAdded: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          textContent: cleaned,
+        };
+        addBook(book);
+        return book;
+      }
     },
     [addBook, toast]
   );
@@ -200,12 +254,12 @@ export function UploadZone() {
         <p className="mt-3 text-sm font-medium">
           {uploading ? "Processing files..." : "Drop files here or click to upload"}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">Supports PDF, EPUB, CBZ, and TXT files up to 100MB</p>
+        <p className="mt-1 text-xs text-muted-foreground">Supports PDF, EPUB, CBZ, DOCX, ODT, RTF, HTML, MD, and TXT files up to 100MB</p>
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.txt,.epub,.cbz,.cbr"
+          accept=".pdf,.txt,.epub,.cbz,.cbr,.docx,.odt,.rtf,.htm,.html,.md"
           multiple
           onChange={handleFileUpload}
         />
