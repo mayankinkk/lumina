@@ -7,10 +7,11 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, List, Check } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, List, Check, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
+import { BookStatsDialog } from "./book-stats-dialog";
 
 export function BookListItem({ book, onToggleSelect, isSelected }) {
   const removeBook = useStore((s) => s.removeBook);
@@ -19,6 +20,7 @@ export function BookListItem({ book, onToggleSelect, isSelected }) {
   const readingQueue = useStore((s) => s.readingQueue);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(book.title);
   const [editAuthor, setEditAuthor] = useState(book.author);
 
@@ -90,6 +92,9 @@ export function BookListItem({ book, onToggleSelect, isSelected }) {
                   <List className="h-3.5 w-3.5" />
                 </Button>
               )}
+              <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); setStatsOpen(true); }} aria-label={`Stats for ${book.title}`}>
+                <BarChart3 className="h-3.5 w-3.5" />
+              </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); setEditTitle(book.title); setEditAuthor(book.author); setEditOpen(true); }} aria-label={`Edit ${book.title}`}>
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
@@ -120,6 +125,8 @@ export function BookListItem({ book, onToggleSelect, isSelected }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BookStatsDialog bookId={book.id} open={statsOpen} onOpenChange={setStatsOpen} />
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>

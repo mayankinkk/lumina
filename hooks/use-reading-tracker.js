@@ -4,8 +4,11 @@ import { useEffect, useRef } from "react";
 import useStore from "@/lib/store";
 
 export function useReadingTracker(bookId) {
-  const startTimeRef = useRef(null);
+  const accumulatedSecondsRef = useRef(0);
+  const pagesReadRef = useRef(0);
+  const prevPageRef = useRef(null);
   const startPageRef = useRef(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     if (!bookId) return;
@@ -13,32 +16,48 @@ export function useReadingTracker(bookId) {
     const { books, updateBook, addReadingSession } = useStore.getState();
     const book = books.find((b) => b.id === bookId);
 
-    startTimeRef.current = Date.now();
-    startPageRef.current = book?.currentPage || 0;
+    const startPage = book?.currentPage || 1;
+    startPageRef.current = startPage;
+    prevPageRef.current = startPage;
+    accumulatedSecondsRef.current = 0;
+    pagesReadRef.current = 0;
 
     updateBook(bookId, {
       lastOpened: new Date().toISOString(),
       status: book?.status === "want_to_read" ? "reading" : book?.status || "reading",
     });
 
+    intervalRef.current = setInterval(() => {
+      accumulatedSecondsRef.current += 30;
+    }, 30000);
+
+    const unsub = useStore.subscribe((state) => {
+      const newPage = state.currentPage;
+      const prevPage = prevPageRef.current;
+      if (newPage !== prevPage) {
+        if (newPage > prevPage) {
+          pagesReadRef.current += newPage - prevPage;
+        }
+        prevPageRef.current = newPage;
+      }
+    });
+
     return () => {
-      if (!startTimeRef.current) return;
+      clearInterval(intervalRef.current);
+      unsub();
 
-      const elapsed = Date.now() - startTimeRef.current;
-      const minutes = Math.round(elapsed / 60000);
-      const { books: latestBooks, addReadingSession: addSession } = useStore.getState();
-      const endPage = latestBooks.find((b) => b.id === bookId)?.currentPage || 0;
-      const pagesRead = Math.max(0, endPage - (startPageRef.current || 0));
+      const minutes = accumulatedSecondsRef.current / 60;
+      const pagesRead = pagesReadRef.current;
 
-      if (minutes >= 1 || pagesRead > 0) {
-        addSession({
+      if (minutes > 0 || pagesRead > 0) {
+        addReadingSession({
           id: crypto.randomUUID(),
           bookId,
           date: new Date().toISOString().slice(0, 10),
-          minutes,
+          minutes: Math.round(minutes * 10) / 10,
           pagesRead,
-          startPage: startPageRef.current || 0,
-          endPage,
+          startPage: startPageRef.current,
+          endPage: useStore.getState().currentPage,
         });
       }
     };
