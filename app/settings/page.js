@@ -21,6 +21,8 @@ import {
 import useStore from "@/lib/store";
 import { TapZoneSettings, getActionLabel } from "@/components/settings/tap-zone-settings";
 import { useWebdav } from "@/hooks/use-webdav";
+import { useGdrive } from "@/hooks/use-gdrive";
+import { useDropbox } from "@/hooks/use-dropbox";
 import { useAppLock } from "@/hooks/use-app-lock";
 import { useNightModeScheduler, getSchedule } from "@/hooks/use-night-mode-scheduler";
 
@@ -578,6 +580,38 @@ export default function SettingsPage() {
                   </div>
                   {syncStatus && <p className="text-xs text-muted-foreground">{syncStatus}</p>}
                   {lastSync && <p className="text-xs text-muted-foreground">Last sync: {new Date(lastSync).toLocaleString()}</p>}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Cloud className="h-4 w-4" /> Google Drive
+                </CardTitle>
+                <CardDescription>Sync your data to Google Drive</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-sm text-muted-foreground">
+                    Coming soon — OAuth integration required
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Download className="h-4 w-4" /> Dropbox
+                </CardTitle>
+                <CardDescription>Sync your data to Dropbox</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-sm text-muted-foreground">
+                    Coming soon — OAuth integration required
+                  </p>
                 </div>
               </CardContent>
             </Card>
