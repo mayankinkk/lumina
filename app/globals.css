@@ -184,3 +184,14 @@
 .animate-page-fade { animation: page-fade-in 0.25s ease-out; }
 .animate-page-flip { animation: page-flip 0.35s ease-out; }
 .animate-page-curl { animation: page-curl 0.3s ease-out; }
+
+@media (orientation: portrait) {
+  .orientation-landscape {
+    writing-mode: sideways-lr;
+  }
+}
+@media (orientation: landscape) {
+  .orientation-portrait {
+    writing-mode: vertical-rl;
+  }
+}

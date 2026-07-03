@@ -41,6 +41,9 @@ export function PdfViewer({ bookId }) {
   const searchCurrentIndex = useStore((s) => s.searchCurrentIndex);
   const setSearchResults = useStore((s) => s.setSearchResults);
   const setSearchCurrentIndex = useStore((s) => s.setSearchCurrentIndex);
+  const bookOrientation = useStore((s) => s.bookOrientation);
+  const currentOrientation = bookOrientation[bookId] || "auto";
+  const orientationRef = useRef(currentOrientation);
 
   const canvasRef = useRef(null);
   const canvasRef2 = useRef(null);
@@ -368,6 +371,14 @@ export function PdfViewer({ bookId }) {
   }, [searchCurrentIndex, searchResults, currentPage, setCurrentPage]);
 
   useEffect(() => {
+    orientationRef.current = currentOrientation;
+    if (currentOrientation === "auto") return;
+    if (typeof screen !== "undefined" && "orientation" in screen && screen.orientation?.lock) {
+      screen.orientation.lock(currentOrientation).catch(() => {});
+    }
+  }, [currentOrientation]);
+
+  useEffect(() => {
     if (!pdfLoadedAt || pageAnimation === "none") return;
     const prev = prevPageRef.current;
     prevPageRef.current = currentPage;
@@ -418,9 +429,9 @@ export function PdfViewer({ bookId }) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative flex-1 overflow-auto ${readerTheme !== "default" && readerTheme !== "custom" ? `theme-${readerTheme}` : ""} ${readerBackground !== "default" ? `bg-${readerBackground}` : ""}`}
+      <div
+        ref={containerRef}
+        className={`relative flex-1 overflow-auto ${readerTheme !== "default" && readerTheme !== "custom" ? `theme-${readerTheme}` : ""} ${readerBackground !== "default" ? `bg-${readerBackground}` : ""} ${currentOrientation === "landscape" ? "orientation-landscape" : currentOrientation === "portrait" ? "orientation-portrait" : ""}`}
       style={readerTheme === "custom" && customThemeColors ? {
         backgroundColor: customThemeColors.background,
         color: customThemeColors.text,

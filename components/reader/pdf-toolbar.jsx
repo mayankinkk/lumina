@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns, List, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns, List, Maximize2, Minimize2, RotateCw, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +77,19 @@ export function PdfToolbar({ bookId }) {
   const [bookmarkOpen, setBookmarkOpen] = useState(false);
   const autoHideToolbar = useStore((s) => s.autoHideToolbar);
   const setAutoHideToolbar = useStore((s) => s.setAutoHideToolbar);
+  const bookOrientation = useStore((s) => s.bookOrientation);
+  const setBookOrientation = useStore((s) => s.setBookOrientation);
+  const currentOrientation = bookOrientation[bookId] || "auto";
+
+  const cycleOrientation = () => {
+    const order = ["auto", "landscape", "portrait"];
+    const idx = order.indexOf(currentOrientation);
+    const next = order[(idx + 1) % order.length];
+    setBookOrientation(bookId, next);
+  };
+
+  const orientationLabel = { auto: "A", landscape: "L", portrait: "P" };
+  const isLocked = currentOrientation !== "auto";
   const [chapterOpen, setChapterOpen] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
 
@@ -357,6 +370,17 @@ export function PdfToolbar({ bookId }) {
             aria-label="Toggle fullscreen mode"
           >
             {autoHideToolbar ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant={isLocked ? "secondary" : "ghost"}
+            size="icon"
+            className="h-8 w-8 relative"
+            onClick={cycleOrientation}
+            aria-label={`Orientation: ${currentOrientation}`}
+          >
+            <RotateCw className="h-4 w-4" />
+            <span className="absolute -bottom-0.5 -right-0.5 text-[8px] font-bold leading-none bg-background rounded-sm px-[2px]">{orientationLabel[currentOrientation]}</span>
+            {isLocked && <Lock className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 text-muted-foreground" />}
           </Button>
           <Button
             variant="ghost"
