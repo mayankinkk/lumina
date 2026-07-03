@@ -8,7 +8,8 @@ import { BookListItem } from "@/components/library/book-list-item";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Grid3X3, List, Search, BookOpen } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Grid3X3, List, Search, BookOpen, ArrowUpDown } from "lucide-react";
 import useStore from "@/lib/store";
 import { OpdsBrowser } from "@/components/library/opds-browser";
 
@@ -24,6 +25,7 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeTag, setActiveTag] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
   const books = useStore((s) => s.books);
   const getAllTags = useStore((s) => s.getAllTags);
   const allTags = useMemo(() => getAllTags(), [books, getAllTags]);
@@ -41,6 +43,26 @@ export default function LibraryPage() {
       return matchesSearch && matchesFilter && matchesTag;
     });
   }, [books, searchQuery, activeFilter, activeTag]);
+
+  const sortedBooks = useMemo(() => {
+    const list = [...filteredBooks];
+    switch (sortBy) {
+      case "title":
+        list.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "author":
+        list.sort((a, b) => (a.author || "").localeCompare(b.author || ""));
+        break;
+      case "progress":
+        list.sort((a, b) => (b.progress || 0) - (a.progress || 0));
+        break;
+      case "recent":
+      default:
+        list.sort((a, b) => new Date(b.lastOpened || 0) - new Date(a.lastOpened || 0));
+        break;
+    }
+    return list;
+  }, [filteredBooks, sortBy]);
 
   return (
     <ShellLayout>
@@ -69,6 +91,18 @@ export default function LibraryPage() {
                 />
               </div>
               <div className="flex items-center gap-2">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="h-8 w-[130px] text-xs">
+                    <ArrowUpDown className="h-3 w-3 mr-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent" className="text-xs">Recent</SelectItem>
+                    <SelectItem value="title" className="text-xs">Title</SelectItem>
+                    <SelectItem value="author" className="text-xs">Author</SelectItem>
+                    <SelectItem value="progress" className="text-xs">Progress</SelectItem>
+                  </SelectContent>
+                </Select>
                 <div className="flex rounded-lg border p-0.5">
                   <Button
                     variant={viewMode === "grid" ? "secondary" : "ghost"}
@@ -131,19 +165,19 @@ export default function LibraryPage() {
 
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {filteredBooks.map((book) => (
+                {sortedBooks.map((book) => (
                   <BookCard key={book.id} book={book} />
                 ))}
               </div>
             ) : (
               <div className="space-y-2">
-                {filteredBooks.map((book) => (
+                {sortedBooks.map((book) => (
                   <BookListItem key={book.id} book={book} />
                 ))}
               </div>
             )}
 
-            {filteredBooks.length === 0 && (
+            {sortedBooks.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <BookOpen className="h-10 w-10 text-muted-foreground/50 mb-3" />
                 <p className="text-sm text-muted-foreground">No books found</p>
