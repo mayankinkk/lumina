@@ -169,7 +169,7 @@ export function OpdsBrowser() {
                         </div>
                       </div>
                     </CardContent>
-                  </div>
+                  </Card>
                 );
               })}
             </div>
