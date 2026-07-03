@@ -7,22 +7,40 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, List, Check, BarChart3 } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, List, Check, BarChart3, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
 import { BookStatsDialog } from "./book-stats-dialog";
+import { useMetadata } from "@/hooks/use-metadata";
 
 export function BookListItem({ book, onToggleSelect, isSelected }) {
   const removeBook = useStore((s) => s.removeBook);
   const updateBook = useStore((s) => s.updateBook);
   const addToReadingQueue = useStore((s) => s.addToReadingQueue);
   const readingQueue = useStore((s) => s.readingQueue);
+  const { lookupByTitle } = useMetadata();
+  const [metaLoadingId, setMetaLoadingId] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(book.title);
   const [editAuthor, setEditAuthor] = useState(book.author);
+
+  const handleAutoMetadata = async () => {
+    setMetaLoadingId(book.id);
+    const result = await lookupByTitle(book.title);
+    if (result) {
+      const updates = {};
+      if (result.author) updates.author = result.author;
+      if (result.description) updates.description = result.description;
+      if (result.coverUrl) updates.coverUrl = result.coverUrl;
+      if (Object.keys(updates).length > 0) {
+        updateBook(book.id, updates);
+      }
+    }
+    setMetaLoadingId(null);
+  };
 
   const statusConfig = {
     reading: { label: "READING", icon: BookOpen, className: "text-green-600 dark:text-green-400" },
@@ -87,6 +105,11 @@ export function BookListItem({ book, onToggleSelect, isSelected }) {
             <div className="flex items-center gap-2 shrink-0">
               {status.icon && <status.icon className={cn("h-3.5 w-3.5", status.className)} />}
               <span className={cn("text-xs", status.className)}>{status.label}</span>
+              {(!book.author || book.author === "Unknown Author") && (
+                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); handleAutoMetadata(); }} aria-label={`Auto-fetch metadata for ${book.title}`}>
+                  <RefreshCw className={cn("h-3.5 w-3.5", metaLoadingId === book.id && "animate-spin")} />
+                </Button>
+              )}
               {!readingQueue.includes(book.id) && (
                 <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); addToReadingQueue(book.id); }} aria-label={`Add ${book.title} to queue`}>
                   <List className="h-3.5 w-3.5" />

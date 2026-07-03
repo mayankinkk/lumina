@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import useStore from "@/lib/store";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
+import { useMetadata } from "@/hooks/use-metadata";
 
 async function loadPdfWorker() {
   const pdfjsLib = await import("pdfjs-dist");
@@ -15,10 +16,12 @@ async function loadPdfWorker() {
 
 export function UploadZone() {
   const addBook = useStore((s) => s.addBook);
+  const updateBook = useStore((s) => s.updateBook);
   const { toast } = useToast();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const { lookupByTitle } = useMetadata();
 
   const processFile = useCallback(
     async (file) => {
@@ -33,6 +36,22 @@ export function UploadZone() {
         toast("File too large. Maximum size is 100MB.", "warning");
         return;
       }
+
+      const maybeFetchMetadata = (book) => {
+        if (book.author === "Unknown Author" || !book.author) {
+          lookupByTitle(book.title).then((result) => {
+            if (result) {
+              const updates = {};
+              if (result.author) updates.author = result.author;
+              if (result.description) updates.description = result.description;
+              if (result.coverUrl) updates.coverUrl = result.coverUrl;
+              if (Object.keys(updates).length > 0) {
+                updateBook(book.id, updates);
+              }
+            }
+          });
+        }
+      };
 
       if (ext === "pdf") {
         const arrayBuffer = await file.arrayBuffer();
@@ -66,6 +85,7 @@ export function UploadZone() {
         };
 
         addBook(book);
+        maybeFetchMetadata(book);
         return book;
       }
 
@@ -91,6 +111,7 @@ export function UploadZone() {
           fileData: arrayBuffer,
         };
         addBook(book);
+        maybeFetchMetadata(book);
         return book;
       }
 
@@ -112,6 +133,7 @@ export function UploadZone() {
           fileData: arrayBuffer,
         };
         addBook(book);
+        maybeFetchMetadata(book);
         return book;
       }
 
@@ -134,6 +156,7 @@ export function UploadZone() {
         };
 
         addBook(book);
+        maybeFetchMetadata(book);
         return book;
       }
 
@@ -163,6 +186,7 @@ export function UploadZone() {
           textContent: text,
         };
         addBook(book);
+        maybeFetchMetadata(book);
         return book;
       }
 
@@ -188,10 +212,11 @@ export function UploadZone() {
           textContent: cleaned,
         };
         addBook(book);
+        maybeFetchMetadata(book);
         return book;
       }
     },
-    [addBook, toast]
+    [addBook, updateBook, toast, lookupByTitle]
   );
 
   const handleFiles = useCallback(

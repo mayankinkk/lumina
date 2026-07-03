@@ -8,12 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload, List, Check, BarChart3 } from "lucide-react";
+import { Clock, CheckCircle2, BookOpen, Trash2, Pencil, Upload, List, Check, BarChart3, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoverColor } from "@/lib/cover-colors";
 import useStore from "@/lib/store";
 import { TagInput } from "./tag-input";
 import { BookStatsDialog } from "./book-stats-dialog";
+import { useMetadata } from "@/hooks/use-metadata";
 
 export function BookCard({ book, onToggleSelect, isSelected }) {
   const removeBook = useStore((s) => s.removeBook);
@@ -25,6 +26,8 @@ export function BookCard({ book, onToggleSelect, isSelected }) {
   const removeCover = useStore((s) => s.removeCover);
   const addToReadingQueue = useStore((s) => s.addToReadingQueue);
   const readingQueue = useStore((s) => s.readingQueue);
+  const { loading: metaLoading, lookupByTitle } = useMetadata();
+  const [metaLoadingId, setMetaLoadingId] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -59,6 +62,21 @@ export function BookCard({ book, onToggleSelect, isSelected }) {
   const handleRemoveCover = async () => {
     setCoverUrl(null);
     await removeCover(book.id);
+  };
+
+  const handleAutoMetadata = async () => {
+    setMetaLoadingId(book.id);
+    const result = await lookupByTitle(book.title);
+    if (result) {
+      const updates = {};
+      if (result.author) updates.author = result.author;
+      if (result.description) updates.description = result.description;
+      if (result.coverUrl) updates.coverUrl = result.coverUrl;
+      if (Object.keys(updates).length > 0) {
+        updateBook(book.id, updates);
+      }
+    }
+    setMetaLoadingId(null);
   };
 
   const statusConfig = {
@@ -151,6 +169,11 @@ export function BookCard({ book, onToggleSelect, isSelected }) {
           </Card>
         </Link>
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {(!book.author || book.author === "Unknown Author") && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 bg-background/80 hover:bg-background" onClick={(e) => { e.preventDefault(); handleAutoMetadata(); }} aria-label={`Auto-fetch metadata for ${book.title}`}>
+              <RefreshCw className={cn("h-3.5 w-3.5", metaLoadingId === book.id && "animate-spin")} />
+            </Button>
+          )}
           {!readingQueue.includes(book.id) && (
             <Button variant="ghost" size="icon" className="h-7 w-7 bg-background/80 hover:bg-background" onClick={(e) => { e.preventDefault(); addToReadingQueue(book.id); }} aria-label={`Add ${book.title} to queue`}>
               <List className="h-3.5 w-3.5" />
