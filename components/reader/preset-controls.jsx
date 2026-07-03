@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -52,34 +53,36 @@ export function PresetControls() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel>Presets</DropdownMenuLabel>
-          <DropdownMenuItem onSelect={() => setSaveOpen(true)}>
-            <BookmarkPlus className="h-3.5 w-3.5" />
-            Save Current as Preset
-          </DropdownMenuItem>
-          {readerPresets.length > 0 && <DropdownMenuSeparator />}
-          {readerPresets.map((p) => (
-            <div key={p.name} className="flex items-center gap-0 px-1 py-0.5">
-              <DropdownMenuItem
-                className="flex-1"
-                onSelect={() => loadPreset(p.name)}
-              >
-                <Play className="h-3.5 w-3.5" />
-                {p.name}
-              </DropdownMenuItem>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deletePreset(p.name);
-                }}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
-          ))}
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Presets</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => setSaveOpen(true)}>
+              <BookmarkPlus className="h-3.5 w-3.5" />
+              Save Current as Preset
+            </DropdownMenuItem>
+            {readerPresets.length > 0 && <DropdownMenuSeparator />}
+            {readerPresets.map((p) => (
+              <div key={p.name} className="flex items-center gap-0 px-1 py-0.5">
+                <DropdownMenuItem
+                  className="flex-1"
+                  onSelect={() => loadPreset(p.name)}
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  {p.name}
+                </DropdownMenuItem>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deletePreset(p.name);
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
