@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import useStore from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 
 export function useReadingTimer() {
   const { readingTimer, setReadingTimer } = useStore(
-    (s) => ({ readingTimer: s.readingTimer, setReadingTimer: s.setReadingTimer })
+    useShallow((s) => ({ readingTimer: s.readingTimer, setReadingTimer: s.setReadingTimer }))
   );
 
   const [running, setRunning] = useState(false);
