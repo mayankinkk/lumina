@@ -20,6 +20,7 @@ import { ChapterPanel } from "./chapter-panel";
 import { PresetControls } from "./preset-controls";
 import { Bookmark, Timer } from "lucide-react";
 import { TimerControls } from "./timer-controls";
+import { KeyboardShortcutsOverlay } from "./keyboard-shortcuts-overlay";
 
 export function PdfToolbar({ bookId }) {
   const router = useRouter();
@@ -408,6 +409,7 @@ export function PdfToolbar({ bookId }) {
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(100)}>
             <RotateCcw className="h-4 w-4" />
           </Button>
+          <KeyboardShortcutsOverlay />
         </div>
       </div>
 
