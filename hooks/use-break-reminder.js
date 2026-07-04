@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import useStore from "@/lib/store";
 
 const STORAGE_KEY = "lumina_eye_health";
 

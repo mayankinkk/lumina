@@ -26,7 +26,7 @@ export function BookCard({ book, onToggleSelect, isSelected }) {
   const removeCover = useStore((s) => s.removeCover);
   const addToReadingQueue = useStore((s) => s.addToReadingQueue);
   const readingQueue = useStore((s) => s.readingQueue);
-  const { loading: metaLoading, lookupByTitle } = useMetadata();
+  const { lookupByTitle } = useMetadata();
   const [metaLoadingId, setMetaLoadingId] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);

@@ -7,7 +7,6 @@ import { X, Plus } from "lucide-react";
 
 export function TagInput({ tags = [], onAdd, onRemove }) {
   const [input, setInput] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
   const inputRef = useRef(null);
 
   const handleKeyDown = (e) => {
