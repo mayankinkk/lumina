@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ZoomIn, ZoomOut, Search, RotateCcw, CheckCircle2, ChevronLeft, ChevronRight, Play, Pause, Volume2, BookOpen, Sun, Ruler, Columns, List, Maximize2, Minimize2, RotateCw, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -92,6 +93,11 @@ export function PdfToolbar({ bookId }) {
   const isLocked = currentOrientation !== "auto";
   const [chapterOpen, setChapterOpen] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
+
+  const timerRef = useClickOutside(timerOpen, () => setTimerOpen(false));
+  const pageAnimRef = useClickOutside(pageAnimOpen, () => setPageAnimOpen(false));
+  const autoScrollRef = useClickOutside(autoScrollOpen, () => setAutoScrollOpen(false));
+  const blueLightRef = useClickOutside(blueLightOpen, () => setBlueLightOpen(false));
 
   const handlePageJump = (e) => {
     if (e.key === "Enter") {
@@ -186,7 +192,7 @@ export function PdfToolbar({ bookId }) {
               <Timer className="h-4 w-4" />
             </Button>
             {timerOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 w-auto rounded-lg border bg-popover p-3 shadow-lg">
+              <div ref={timerRef} className="absolute right-0 top-full mt-1 z-30 w-auto rounded-lg border bg-popover p-3 shadow-lg">
                 <TimerControls />
               </div>
             )}
@@ -243,10 +249,10 @@ export function PdfToolbar({ bookId }) {
               <BookOpen className="h-4 w-4" />
             </Button>
             {pageAnimOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
+              <div ref={pageAnimRef} className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
                 <div className="space-y-3">
                   <Label className="text-xs font-medium">Page Animation</Label>
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-5 gap-1">
                     {[
                       { value: "none", label: "None" },
                       { value: "slide", label: "Slide" },
@@ -292,7 +298,7 @@ export function PdfToolbar({ bookId }) {
               {autoScrollMode !== "off" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
             {autoScrollOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
+              <div ref={autoScrollRef} className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
                 <div className="space-y-3">
                   <Label className="text-xs font-medium">Auto-scroll</Label>
                   <div className="flex gap-1">
@@ -344,7 +350,7 @@ export function PdfToolbar({ bookId }) {
               <Sun className="h-4 w-4" />
             </Button>
             {blueLightOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
+              <div ref={blueLightRef} className="absolute right-0 top-full mt-1 z-30 w-56 rounded-lg border bg-popover p-3 shadow-lg">
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Blue Light Filter</Label>
                   <Slider

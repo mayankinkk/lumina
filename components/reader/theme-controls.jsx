@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import useStore from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
@@ -36,6 +37,7 @@ export function ThemeControls() {
   );
   const [open, setOpen] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
+  const panelRef = useClickOutside(open, () => setOpen(false));
   const [localBg, setLocalBg] = useState(customThemeColors?.background || "#ffffff");
   const [localText, setLocalText] = useState(customThemeColors?.text || "#000000");
   const [localAccent, setLocalAccent] = useState(customThemeColors?.accent || "#3b82f6");
@@ -65,7 +67,7 @@ export function ThemeControls() {
         <Palette className="h-4 w-4" />
       </Button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 w-72 rounded-lg border bg-popover p-3 shadow-lg">
+        <div ref={panelRef} className="absolute right-0 top-full mt-1 z-30 w-72 rounded-lg border bg-popover p-3 shadow-lg">
           <div className="space-y-3">
             <Label className="text-xs font-medium">Reader Theme</Label>
             <div className="grid grid-cols-3 gap-1.5">

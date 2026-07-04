@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Type, AlignLeft, AlignJustify } from "lucide-react";
 import { useState } from "react";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 const fonts = [
   { value: "literata", label: "Literata" },
@@ -36,6 +37,7 @@ export function FontControls() {
     }))
   );
   const [open, setOpen] = useState(false);
+  const panelRef = useClickOutside(open, () => setOpen(false));
 
   return (
     <div className="relative">
@@ -49,7 +51,7 @@ export function FontControls() {
         <Type className="h-4 w-4" />
       </Button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 w-64 rounded-lg border bg-popover p-3 shadow-lg">
+        <div ref={panelRef} className="absolute right-0 top-full mt-1 z-30 w-64 rounded-lg border bg-popover p-3 shadow-lg">
           <div className="space-y-3">
             <Label className="text-xs font-medium">Font Settings</Label>
 
