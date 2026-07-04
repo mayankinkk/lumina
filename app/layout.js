@@ -51,6 +51,13 @@ export default function RootLayout({ children }) {
       className={`${literata.variable} ${jakarta.variable} h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); }); }`,
+          }}
+        />
+      </head>
       <body className="min-h-full bg-background font-sans antialiased">
         <ThemeProvider
           attribute="class"
