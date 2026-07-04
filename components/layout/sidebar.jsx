@@ -9,6 +9,7 @@ import {
   BookMarked,
   StickyNote,
   Settings,
+  BarChart3,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { getDueWordsCount } from "@/lib/sm2";
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/library", label: "Library", icon: BookOpen },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/vocabulary", label: "Vocabulary", icon: BookMarked },
   { href: "/notes", label: "Notes", icon: StickyNote },
   { href: "/settings", label: "Settings", icon: Settings },
