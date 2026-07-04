@@ -127,8 +127,8 @@ export function ComicViewer({ bookId, book }) {
               draggable={false}
             />
             {/* Navigation zones */}
-            <div className="absolute inset-y-0 left-0 w-[35%] cursor-w-resp" />
-            <div className="absolute inset-y-0 right-0 w-[35%] cursor-e-resp" />
+            <div className="absolute inset-y-0 left-0 w-[35%] cursor-w-resize" />
+            <div className="absolute inset-y-0 right-0 w-[35%] cursor-e-resize" />
           </div>
         </div>
       )}

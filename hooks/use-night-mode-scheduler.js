@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useStore } from "@/lib/store";
+import useStore from "@/lib/store";
 
 const STORAGE_KEY = "lumina-night-mode-schedule";
 

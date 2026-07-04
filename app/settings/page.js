@@ -232,7 +232,7 @@ export default function SettingsPage() {
   const handleExportStats = () => {
     const totalSessions = readingSessions.length;
     const totalPages = readingSessions.reduce((s, r) => s + (r.pagesRead || 0), 0);
-    const totalMinutes = readingSessions.reduce((s, r) => s + (r.duration || 0), 0);
+    const totalMinutes = readingSessions.reduce((s, r) => s + (r.minutes || 0), 0);
     const streak = (() => {
       let count = 0;
       const d = new Date();
@@ -255,7 +255,7 @@ export default function SettingsPage() {
       currentStreakDays: streak,
       sessions: readingSessions.map((r) => ({
         date: r.date,
-        durationMinutes: r.duration,
+        durationMinutes: r.minutes,
         pagesRead: r.pagesRead,
         bookId: r.bookId,
       })),

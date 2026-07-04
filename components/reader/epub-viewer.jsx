@@ -37,6 +37,7 @@ export function EpubViewer({ bookId, book }) {
         const blob = new Blob([fileData], { type: "application/epub+zip" });
         const url = URL.createObjectURL(blob);
 
+        const savedPage = book.currentPage;
         const book = epubjs.default ? new epubjs.default(url) : new epubjs(url);
         bookRef.current = book;
 
@@ -66,12 +67,14 @@ export function EpubViewer({ bookId, book }) {
         }
         useStore.getState().setEpubRendition(rendition);
 
-        const target = book.currentPage > 0 ? book.currentPage - 1 : 0;
+        const target = savedPage > 0 ? savedPage - 1 : 0;
         await rendition.display(target);
 
         rendition.on("relocated", (location) => {
           if (location?.start?.index !== undefined) {
-            setCurrentPage(location.start.index + 1);
+            const page = location.start.index + 1;
+            setCurrentPage(page);
+            updateBook(bookId, { currentPage: page });
           }
         });
 

@@ -50,6 +50,6 @@ export function ToastProvider({ children }) {
 
 export function useToast() {
   const toast = useContext(ToastContext);
-  if (!toast) return () => {};
+  if (!toast) return { toast: () => {} };
   return { toast };
 }
