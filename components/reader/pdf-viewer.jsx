@@ -48,10 +48,13 @@ export function PdfViewer({ bookId }) {
 
   const canvasRef = useRef(null);
   const canvasRef2 = useRef(null);
+  const textLayerRef = useRef(null);
+  const textLayerRef2 = useRef(null);
   const containerRef = useRef(null);
   const pdfDocRef = useRef(null);
   const renderTaskIdRef = useRef(0);
   const activeRenderTaskRef = useRef(null);
+  const textLayerTaskRef = useRef(0);
   const prevPageRef = useRef(currentPage);
 
   const [loading, setLoading] = useState(true);
@@ -171,6 +174,26 @@ export function PdfViewer({ bookId }) {
 
         if (taskId !== renderTaskIdRef.current) return;
 
+        // Render text layer on top of canvas for text selection
+        const textLayerDiv = textLayerRef.current;
+        if (textLayerDiv) {
+          try {
+            const { TextLayer } = await import("pdfjs-dist");
+            textLayerDiv.innerHTML = "";
+            textLayerDiv.style.width = `${viewport.width}px`;
+            textLayerDiv.style.height = `${viewport.height}px`;
+            const textContent = await page.getTextContent();
+            const tl = new TextLayer({
+              textContentSource: textContent,
+              container: textLayerDiv,
+              viewport,
+            });
+            await tl.render();
+          } catch (tlErr) {
+            console.warn("Text layer render error:", tlErr);
+          }
+        }
+
         // If dual page mode, render page 2 (currentPage+1) on the right canvas
         const dual = useStore.getState().dualPageMode;
         if (dual && canvasRef2.current && currentPage < pdf.numPages) {
@@ -186,6 +209,26 @@ export function PdfViewer({ bookId }) {
           await rt2.promise;
           activeRenderTaskRef.current = null;
           if (taskId !== renderTaskIdRef.current) return;
+
+          // Render text layer for page 2
+          const textLayerDiv2 = textLayerRef2.current;
+          if (textLayerDiv2) {
+            try {
+              const { TextLayer } = await import("pdfjs-dist");
+              textLayerDiv2.innerHTML = "";
+              textLayerDiv2.style.width = `${vp2.width}px`;
+              textLayerDiv2.style.height = `${vp2.height}px`;
+              const textContent2 = await page2.getTextContent();
+              const tl2 = new TextLayer({
+                textContentSource: textContent2,
+                container: textLayerDiv2,
+                viewport: vp2,
+              });
+              await tl2.render();
+            } catch (tlErr) {
+              console.warn("Text layer 2 render error:", tlErr);
+            }
+          }
         } else if (canvasRef2.current) {
           const c2 = canvasRef2.current;
           const ctx2 = c2.getContext("2d");
@@ -466,19 +509,25 @@ export function PdfViewer({ bookId }) {
         style={{ visibility: loading || error ? "hidden" : "visible", animationDuration: pageAnimation === "none" ? "0ms" : undefined }}
       >
         <div className={`flex ${dualPageMode ? "gap-2 flex-row" : ""} items-start justify-center`}>
-          <canvas
-            ref={canvasRef}
-            className={`shadow-lg ${dualPageMode ? "w-[calc(50%-4px)]" : "max-w-full"}`}
-            role="img"
-            aria-label={`Page ${currentPage} of ${book.totalPages}`}
-          />
-          {dualPageMode && (
+          <div className="pdf-canvas-wrapper relative inline-block">
             <canvas
-              ref={canvasRef2}
-              className="shadow-lg w-[calc(50%-4px)]"
+              ref={canvasRef}
+              className={`shadow-lg ${dualPageMode ? "w-[calc(50%-4px)]" : "max-w-full"}`}
               role="img"
-              aria-label={`Page ${currentPage + 1} of ${book.totalPages}`}
+              aria-label={`Page ${currentPage} of ${book.totalPages}`}
             />
+            <div ref={textLayerRef} className="pdf-text-layer" />
+          </div>
+          {dualPageMode && (
+            <div className="pdf-canvas-wrapper relative inline-block">
+              <canvas
+                ref={canvasRef2}
+                className="shadow-lg w-[calc(50%-4px)]"
+                role="img"
+                aria-label={`Page ${currentPage + 1} of ${book.totalPages}`}
+              />
+              <div ref={textLayerRef2} className="pdf-text-layer" />
+            </div>
           )}
         </div>
       </div>

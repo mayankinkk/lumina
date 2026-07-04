@@ -195,3 +195,47 @@
     writing-mode: vertical-rl;
   }
 }
+
+/* PDF text layer - invisible selectable text over canvas */
+.pdf-text-layer {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  opacity: 1;
+  line-height: 1;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 1;
+  pointer-events: auto;
+}
+.pdf-text-layer > span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  z-index: 1;
+  font-size: calc(var(--total-scale-factor, 1) * var(--font-height, 0));
+}
+.pdf-text-layer ::selection {
+  background: rgba(0, 0, 255, 0.25);
+  background: color-mix(in srgb, AccentColor, transparent 75%);
+}
+.pdf-text-layer ::-moz-selection {
+  background: rgba(0, 0, 255, 0.25);
+}
+.pdf-text-layer br::selection {
+  background: transparent;
+}
+.pdf-text-layer br::-moz-selection {
+  background: transparent;
+}
+.pdf-canvas-wrapper {
+  position: relative;
+}
+.pdf-canvas-wrapper canvas {
+  position: relative;
+  z-index: 0;
+}
