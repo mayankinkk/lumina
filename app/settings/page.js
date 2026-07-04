@@ -543,16 +543,38 @@ export default function SettingsPage() {
                   />
                 </div>
                 {nightMode.isActive && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-sm font-medium" htmlFor="night-start">Start time</label>
-                      <Input id="night-start" type="time" value={nightStart} onChange={(e) => { setNightStart(e.target.value); nightMode.set(e.target.value, nightEnd); }} />
+                  <>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={!nightMode.schedule?.mode || nightMode.schedule?.mode === "manual" ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => nightMode.set(nightStart, nightEnd)}
+                      >
+                        Manual Times
+                      </Button>
+                      <Button
+                        variant={nightMode.schedule?.mode === "sunrise-sunset" ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={nightMode.enableSunriseSunset}
+                      >
+                        {nightMode.sunTimes ? `Sunset ${nightMode.sunTimes.sunset} / Sunrise ${nightMode.sunTimes.sunrise}` : "Sunrise & Sunset"}
+                      </Button>
                     </div>
-                    <div>
-                      <label className="text-sm font-medium" htmlFor="night-end">End time</label>
-                      <Input id="night-end" type="time" value={nightEnd} onChange={(e) => { setNightEnd(e.target.value); nightMode.set(nightStart, e.target.value); }} />
-                    </div>
-                  </div>
+                    {(!nightMode.schedule?.mode || nightMode.schedule?.mode === "manual") && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-sm font-medium" htmlFor="night-start">Start time</label>
+                          <Input id="night-start" type="time" value={nightStart} onChange={(e) => { setNightStart(e.target.value); nightMode.set(e.target.value, nightEnd); }} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium" htmlFor="night-end">End time</label>
+                          <Input id="night-end" type="time" value={nightEnd} onChange={(e) => { setNightEnd(e.target.value); nightMode.set(nightStart, e.target.value); }} />
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
