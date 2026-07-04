@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { GlobalSearch } from "@/components/layout/global-search";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { getDueWordsCount } from "@/lib/sm2";
 import useStore from "@/lib/store";
@@ -25,6 +27,7 @@ export function Header() {
     useShallow((s) => ({ toggleSidebar: s.toggleSidebar }))
   );
   const dueCount = useStore((s) => getDueWordsCount(s.vocabulary));
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -75,11 +78,15 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSearchOpen(true)} aria-label="Search">
+            <Search className="h-4 w-4" />
+          </Button>
           <div className="hidden lg:block">
             <ThemeToggle />
           </div>
         </div>
       </div>
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }
