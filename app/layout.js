@@ -5,6 +5,7 @@ import { StoreHydrator } from "@/components/store-hydrator";
 import { ToastProvider } from "@/components/toast";
 import { AppLockProvider } from "@/components/layout/app-lock";
 import { ReadingInsights } from "@/components/layout/reading-insights";
+import { OnboardingFlow } from "@/components/layout/onboarding-flow";
 import "./globals.css";
 
 const literata = Literata({
@@ -61,6 +62,7 @@ export default function RootLayout({ children }) {
             <ToastProvider>
               <StoreHydrator />
               <ReadingInsights />
+              <OnboardingFlow />
               <AppLockProvider>
                 {children}
               </AppLockProvider>
