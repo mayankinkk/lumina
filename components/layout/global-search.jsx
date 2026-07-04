@@ -63,7 +63,7 @@ export function GlobalSearch({ open, onOpenChange }) {
         </div>
         <div className="flex-1 overflow-y-auto space-y-3 mt-2">
           {query.length >= 2 && totalResults === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">No results found for &ldquo;{query}&rdquo;</p>
+            <p aria-live="polite" className="text-sm text-muted-foreground text-center py-8">No results found for &ldquo;{query}&rdquo;</p>
           )}
           {results.books.length > 0 && (
             <div>

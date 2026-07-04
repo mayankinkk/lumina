@@ -13,7 +13,7 @@ const illustrations = {
 export function EmptyState({ type = "default", action }) {
   const { icon: Icon, title, desc } = illustrations[type] || illustrations.default;
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div role="status" className="flex flex-col items-center justify-center py-16 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
         <Icon className="h-8 w-8 text-muted-foreground" />
       </div>

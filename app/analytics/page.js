@@ -179,7 +179,7 @@ export default function AnalyticsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px]">
+              <div className="h-[250px]" aria-label="Daily reading activity chart">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.dailyData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-sm font-medium">Weekly Trend</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[220px]">
+                <div className="h-[220px]" aria-label="Weekly trend chart">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={stats.weeklyData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -223,7 +223,7 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-sm font-medium">Time Per Book</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[220px] flex items-center">
+                <div className="h-[220px] flex items-center" aria-label="Time per book pie chart">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie

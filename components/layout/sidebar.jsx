@@ -68,7 +68,7 @@ export function Sidebar() {
             </Button>
           </div>
 
-          <nav className="flex-1 space-y-1 px-3 py-4">
+          <nav className="flex-1 space-y-1 px-3 py-4" role="navigation" aria-label="Main navigation">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"

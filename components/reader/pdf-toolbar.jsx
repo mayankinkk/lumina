@@ -111,7 +111,7 @@ export function PdfToolbar({ bookId }) {
   };
 
   return (
-    <div className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div role="toolbar" className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between px-3 py-2 lg:px-4">
         <div className="flex items-center gap-2 min-w-0">
           <Button
