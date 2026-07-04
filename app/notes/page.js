@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Highlighter, StickyNote } from "lucide-react";
+import { Search, Plus, Highlighter, StickyNote, Download, Upload } from "lucide-react";
 import useStore from "@/lib/store";
 import { HighlightCard, NoteCard } from "@/components/notes/note-cards";
 
@@ -44,6 +44,54 @@ export default function NotesPage() {
   const openNew = () => { setEditingItem(null); setNoteText(""); setNoteHighlight("#fde047"); setDialogOpen(true); };
   const openEdit = (item) => { setEditingItem(item); setNoteText(item.text); setNoteHighlight(item.color || "#fde047"); setDialogOpen(true); };
 
+  const handleExport = () => {
+    const data = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      highlights,
+      notes,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lumina-notes-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (data.highlights) {
+            const existingIds = new Set(highlights.map((h) => h.id));
+            data.highlights.forEach((h) => {
+              if (!existingIds.has(h.id)) addHighlight(h);
+            });
+          }
+          if (data.notes) {
+            const existingIds = new Set(notes.map((n) => n.id));
+            data.notes.forEach((n) => {
+              if (!existingIds.has(n.id)) addNote(n);
+            });
+          }
+        } catch {
+          alert("Invalid backup file");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   const handleSave = () => {
     if (!noteText.trim()) return;
     if (editingItem?.isHighlight) {
@@ -59,12 +107,16 @@ export default function NotesPage() {
   return (
     <ShellLayout>
       <div className="p-4 lg:p-6 space-y-6">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between flex-wrap gap-2">
           <div>
             <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">Notes</h1>
             <p className="mt-1 text-sm text-muted-foreground">{highlights.length + notes.length} item{highlights.length + notes.length !== 1 ? "s" : ""} saved</p>
           </div>
-          <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Add Note</Button>
+          <div className="flex gap-2">
+            <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Add Note</Button>
+            <Button variant="outline" size="sm" onClick={handleExport}><Download className="h-4 w-4 mr-1" /> Export</Button>
+            <Button variant="outline" size="sm" onClick={handleImport}><Upload className="h-4 w-4 mr-1" /> Import</Button>
+          </div>
         </div>
 
         <div className="relative max-w-sm">
