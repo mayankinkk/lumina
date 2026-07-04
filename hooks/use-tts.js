@@ -6,6 +6,7 @@ export function useTts() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [rate, setRate] = useState(1);
+  const [pitch, setPitch] = useState(1);
   const [voice, setVoice] = useState(null);
   const [voices, setVoices] = useState([]);
   const utteranceRef = useRef(null);
@@ -53,6 +54,7 @@ export function useTts() {
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = rate;
+    utterance.pitch = pitch;
     if (voice) utterance.voice = voice;
     utteranceRef.current = utterance;
 
@@ -69,7 +71,7 @@ export function useTts() {
     synth.speak(utterance);
     setSpeaking(true);
     setPaused(false);
-  }, [rate, voice]);
+  }, [rate, pitch, voice]);
 
   const pause = useCallback(() => {
     const synth = window.speechSynthesis;
@@ -108,6 +110,8 @@ export function useTts() {
     paused,
     rate,
     setRate,
+    pitch,
+    setPitch,
     voice,
     setVoice,
     voices,

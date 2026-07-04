@@ -7,10 +7,12 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTts } from "@/hooks/use-tts";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 export function TtsControls({ content }) {
-  const { speaking, paused, rate, setRate, voice, setVoice, voices, speak, stop, togglePlayPause, supported } = useTts();
+  const { speaking, paused, rate, setRate, pitch, setPitch, voice, setVoice, voices, speak, stop, togglePlayPause, supported } = useTts();
   const [open, setOpen] = useState(false);
+  const panelRef = useClickOutside(open, () => setOpen(false));
 
   if (!supported) return null;
 
@@ -34,7 +36,7 @@ export function TtsControls({ content }) {
         {speaking ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
       </Button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 w-64 rounded-lg border bg-popover p-3 shadow-lg">
+        <div ref={panelRef} className="absolute right-0 top-full mt-1 z-30 w-64 rounded-lg border bg-popover p-3 shadow-lg">
           <div className="space-y-3">
             <Label className="text-xs font-medium">Text-to-Speech</Label>
 
@@ -68,6 +70,17 @@ export function TtsControls({ content }) {
                 step={0.1}
                 value={[rate]}
                 onValueChange={([v]) => setRate(v)}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Pitch: {pitch}</Label>
+              <Slider
+                min={0}
+                max={2}
+                step={0.1}
+                value={[pitch]}
+                onValueChange={([v]) => setPitch(v)}
               />
             </div>
 
